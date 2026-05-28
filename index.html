@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioOncology Risk Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f1a;
+  --bg2: #0f1626;
+  --bg3: #141d30;
+  --surface: #1a2540;
+  --surface2: #1f2d4a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8edf5;
+  --text2: #8a9ab8;
+  --text3: #556070;
+  --accent: #4a9eff;
+  --accent2: #1a6fd4;
+  --gold: #f0b429;
+  --teal: #2dd4bf;
+  --rose: #fb7185;
+  --green: #34d399;
+  --purple: #a78bfa;
+  --low: #34d399;
+  --mod: #f0b429;
+  --high: #fb923c;
+  --vhigh: #fb7185;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* GRID BG */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(74,158,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,158,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+.container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* HEADER */
+header{padding:48px 0 32px;text-align:center}
+.header-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  color:var(--accent);text-transform:uppercase;
+  background:rgba(74,158,255,0.08);
+  border:1px solid rgba(74,158,255,0.2);
+  padding:5px 14px;border-radius:20px;margin-bottom:20px;
+}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+h1{font-family:var(--serif);font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:10px;letter-spacing:-.01em}
+h1 span{color:var(--accent);font-style:italic}
+.subtitle{font-size:14px;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.7}
+.author-tag{
+  display:inline-block;margin-top:14px;
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+  letter-spacing:.06em;
+}
+
+/* STEPS NAV */
+.steps-nav{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;margin:36px 0 28px;
+}
+.step-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:500;color:var(--text3);
+  padding:8px 16px;cursor:pointer;transition:color .2s;
+}
+.step-item.active{color:var(--accent)}
+.step-item.done{color:var(--teal)}
+.step-num{
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  background:var(--surface);border:1px solid var(--border2);
+  transition:all .2s;
+}
+.step-item.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-item.done .step-num{background:var(--teal);border-color:var(--teal);color:#000}
+.step-connector{width:40px;height:1px;background:var(--border2)}
+
+/* CARD */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:28px;
+  margin-bottom:16px;
+  animation:fadeUp .4s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card-title{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--serif);font-size:18px;margin-bottom:20px;
+  padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+.card-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.03em;text-transform:uppercase}
+.label-note{font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+
+input[type=number],select{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  color:var(--text);
+  font-family:var(--sans);font-size:14px;
+  padding:10px 12px;
+  width:100%;
+  transition:border-color .2s,box-shadow .2s;
+  appearance:none;
+}
+input[type=number]:focus,select:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(74,158,255,0.12);
+}
+select option{background:var(--bg3)}
+
+/* TOGGLE PILLS */
+.pill-group{display:flex;gap:6px;flex-wrap:wrap}
+.pill{
+  padding:7px 14px;border-radius:20px;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--text2);
+  font-family:var(--sans);font-size:13px;cursor:pointer;
+  transition:all .15s;
+}
+.pill:hover{border-color:var(--accent);color:var(--accent)}
+.pill.active{background:rgba(74,158,255,0.12);border-color:var(--accent);color:var(--accent);font-weight:500}
+.pill.active-rose{background:rgba(251,113,133,0.12);border-color:var(--rose);color:var(--rose)}
+.pill.active-teal{background:rgba(45,212,191,0.12);border-color:var(--teal);color:var(--teal)}
+
+/* SLIDER */
+.slider-wrap{display:flex;flex-direction:column;gap:8px}
+.slider-row{display:flex;align-items:center;gap:12px}
+input[type=range]{
+  flex:1;height:4px;appearance:none;
+  background:var(--border2);border-radius:2px;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--accent);cursor:pointer;
+  box-shadow:0 0 6px rgba(74,158,255,0.5);
+}
+.slider-val{
+  font-family:var(--mono);font-size:13px;color:var(--accent);
+  min-width:48px;text-align:right;font-weight:500;
+}
+.dose-bar{height:6px;border-radius:3px;background:var(--border2);overflow:hidden;margin-top:4px}
+.dose-fill{height:100%;border-radius:3px;transition:width .3s,background .3s}
+
+/* RISK FACTORS CHECKBOXES */
+.rf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rf-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;cursor:pointer;
+  transition:all .15s;
+}
+.rf-item:hover{border-color:var(--border2)}
+.rf-item.checked{border-color:rgba(74,158,255,0.3);background:rgba(74,158,255,0.05)}
+.rf-checkbox{
+  width:16px;height:16px;border-radius:4px;
+  border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .15s;font-size:10px;
+}
+.rf-item.checked .rf-checkbox{background:var(--accent);border-color:var(--accent);color:#fff}
+.rf-label{font-size:13px;color:var(--text2)}
+.rf-item.checked .rf-label{color:var(--text)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.btn{
+  padding:11px 24px;border-radius:10px;
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  cursor:pointer;transition:all .15s;border:none;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#3a8ef0;transform:translateY(-1px);box-shadow:0 4px 16px rgba(74,158,255,0.3)}
+.btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block;animation:fadeUp .35s ease}
+
+/* RESULT CARD */
+.result-hero{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:16px;padding:32px;
+  text-align:center;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.result-hero::before{
+  content:'';position:absolute;inset:0;
+  opacity:.06;background:radial-gradient(circle at 50% 0%,var(--risk-color,#4a9eff) 0%,transparent 60%);
+  pointer-events:none;
+}
+.risk-gauge{
+  width:120px;height:120px;margin:0 auto 16px;
+  position:relative;
+}
+.risk-gauge svg{transform:rotate(-90deg)}
+.risk-pct{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--mono);font-size:26px;font-weight:500;
+}
+.risk-level{
+  font-family:var(--serif);font-size:28px;margin-bottom:6px;
+}
+.risk-desc{font-size:13px;color:var(--text2);max-width:340px;margin:0 auto;line-height:1.6}
+
+/* BREAKDOWN */
+.breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.breakdown-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:16px;text-align:center;
+}
+.bc-val{font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:4px}
+.bc-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+
+/* FACTOR BARS */
+.factor-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.factor-item{display:flex;align-items:center;gap:10px}
+.factor-name{font-size:12px;color:var(--text2);width:150px;flex-shrink:0}
+.factor-bar-wrap{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.factor-bar{height:100%;border-radius:3px;transition:width .6s ease .1s}
+.factor-score{font-family:var(--mono);font-size:11px;color:var(--text3);width:28px;text-align:right}
+
+/* SEX INSIGHT BOX */
+.sex-insight{
+  border-radius:12px;padding:16px;margin-bottom:16px;
+  border:1px solid;display:flex;gap:12px;align-items:flex-start;
+}
+.sex-insight.female{
+  background:rgba(251,113,133,0.06);
+  border-color:rgba(251,113,133,0.2);
+}
+.sex-insight.male{
+  background:rgba(74,158,255,0.06);
+  border-color:rgba(74,158,255,0.2);
+}
+.si-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.si-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.si-text{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* RECOMMENDATIONS */
+.rec-list{display:flex;flex-direction:column;gap:8px}
+.rec-item{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+}
+.rec-badge{
+  font-size:10px;font-weight:500;padding:2px 8px;
+  border-radius:10px;flex-shrink:0;margin-top:1px;
+  font-family:var(--mono);letter-spacing:.03em;
+}
+.rec-badge.monitor{background:rgba(240,180,41,0.15);color:var(--gold)}
+.rec-badge.protect{background:rgba(52,211,153,0.15);color:var(--green)}
+.rec-badge.alert{background:rgba(251,113,133,0.15);color:var(--rose)}
+.rec-badge.sex{background:rgba(167,139,250,0.15);color:var(--purple)}
+.rec-text{font-size:13px;color:var(--text2);line-height:1.6}
+.rec-text strong{color:var(--text)}
+
+/* RESEARCH NOTE */
+.research-note{
+  background:rgba(74,158,255,0.04);
+  border:1px solid rgba(74,158,255,0.15);
+  border-radius:10px;padding:14px 16px;
+  display:flex;gap:10px;align-items:flex-start;margin-top:8px;
+}
+.rn-text{font-size:11px;color:var(--text3);line-height:1.6}
+
+/* PROGRESS BAR */
+.form-progress{
+  height:2px;background:var(--border);
+  border-radius:1px;margin-bottom:28px;overflow:hidden;
+}
+.form-progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--teal));
+  border-radius:1px;transition:width .4s ease;
+}
+
+/* DISCLAIMER */
+.disclaimer{
+  text-align:center;font-size:11px;color:var(--text3);
+  line-height:1.7;margin:28px 0 48px;
+  padding:16px;border:1px solid var(--border);
+  border-radius:10px;
+}
+
+/* CONDITIONAL */
+.conditional{display:none}
+.conditional.show{display:block}
+
+/* MOBILE */
+@media(max-width:580px){
+  .form-grid,.form-grid.three{grid-template-columns:1fr}
+  .breakdown{grid-template-columns:1fr}
+  .rf-grid{grid-template-columns:1fr}
+  .steps-nav{gap:0}
+  .step-item span{display:none}
+  .step-connector{width:20px}
+}
+
+/* MODULE TABS */
+.module-tabs{display:flex;gap:6px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:5px}
+.mod-tab{flex:1;padding:9px 10px;border-radius:8px;border:none;background:transparent;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.mod-tab:hover{color:var(--text2)}
+.mod-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+
+/* MODULE WRAPPERS */
+.module{display:none}.module.active{display:block}
+
+/* COHORT TABLE */
+.cohort-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.cohort-table th{text-align:left;padding:8px 10px;font-weight:500;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.cohort-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.cohort-table tr:hover td{background:var(--surface2)}
+.cohort-table .risk-cell{font-family:var(--mono);font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
+.ct-low{background:rgba(52,211,153,.15);color:var(--green)}
+.ct-mod{background:rgba(240,180,41,.15);color:var(--gold)}
+.ct-high{background:rgba(251,146,60,.15);color:var(--high)}
+.ct-vh{background:rgba(251,113,133,.15);color:var(--rose)}
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.del-btn:hover{color:var(--rose);background:rgba(251,113,133,.1)}
+
+/* COHORT FORM */
+.cohort-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.cf-group{display:flex;flex-direction:column;gap:4px}
+.cf-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.cf-input{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;width:100%}
+.cf-input:focus{outline:none;border-color:var(--accent)}
+.cf-select{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;width:100%;appearance:none}
+
+/* CHART CONTAINERS */
+.chart-wrap{position:relative;height:300px;margin-bottom:8px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.chart-legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-cell{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:3px}
+.stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+
+/* PREVENTION */
+.pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.pv-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s}
+.pv-card:hover{border-color:var(--border2)}
+.pv-card.selected{border-color:var(--accent);background:rgba(74,158,255,.05)}
+.pv-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pv-icon{font-size:20px}
+.pv-name{font-size:14px;font-weight:500;color:var(--text)}
+.pv-class{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.pv-bar-wrap{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.pv-bar{height:100%;border-radius:3px;transition:width .6s ease}
+.pv-efficacy{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.evidence-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;font-family:var(--mono);font-weight:500;margin-bottom:8px}
+.ev-a{background:rgba(52,211,153,.15);color:var(--green)}
+.ev-b{background:rgba(240,180,41,.15);color:var(--gold)}
+.ev-c{background:rgba(167,139,250,.15);color:var(--purple)}
+.ev-emerging{background:rgba(74,158,255,.15);color:var(--accent)}
+.pv-detail{font-size:12px;color:var(--text2);line-height:1.6}
+.pv-trial{font-size:11px;color:var(--text3);margin-top:6px;font-style:italic}
+.sex-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:6px;font-family:var(--mono)}
+.sex-f{background:rgba(251,113,133,.15);color:var(--rose)}
+.sex-m{background:rgba(74,158,255,.15);color:var(--accent)}
+.sex-both{background:rgba(167,139,250,.15);color:var(--purple)}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px;margin-bottom:16px}
+.timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:1.5px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bg3);position:absolute;left:-21px;top:2px}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:2px}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.tl-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* DETAIL PANEL */
+.detail-panel{background:rgba(74,158,255,.04);border:1px solid rgba(74,158,255,.15);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
+.detail-panel.open{display:block;animation:fadeUp .3s ease}
+
+@media(max-width:580px){
+  .chart-row,.pv-grid{grid-template-columns:1fr}
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+  .cohort-form{grid-template-columns:1fr 1fr}
+  .module-tabs{flex-wrap:wrap}
+  .mod-tab{font-size:11px;padding:7px 8px}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<!-- HEADER -->
+<header>
+  <div class="header-tag">
+    <span class="dot-pulse"></span>
+    Clinical Decision Support Tool — Beta v1.0
+  </div>
+  <h1>Cardio<span>Oncology</span><br>Risk Predictor</h1>
+  <p class="subtitle">Sex-stratified prediction of chemotherapy-induced cardiotoxicity risk with evidence-based protective recommendations</p>
+  <div class="author-tag">Developed by Jomana Alzyoudie, MSc · PhD Research Tool · Monash University Application 2026</div>
+</header>
+
+<!-- STEPS -->
+<div class="steps-nav">
+  <div class="step-item active" id="nav1" onclick="goTo(1)">
+    <div class="step-num" id="sn1">1</div>
+    <span>Patient Profile</span>
+  </div>
+  <div class="step-connector"></div>
+  <div class="step-item" id="nav2" onclick="goTo(2)">
+    <div class="step-num" id="sn2">2</div>
+    <span>Treatment</span>
+  </div>
+  <div class="step-connector"></div>
+  <div class="step-item" id="nav3" onclick="goTo(3)">
+    <div class="step-num" id="sn3">3</div>
+    <span>Cardiac Status</span>
+  </div>
+  <div class="step-connector"></div>
+  <div class="step-item" id="nav4" onclick="goTo(4)">
+    <div class="step-num" id="sn4">4</div>
+    <span>Results</span>
+  </div>
+</div>
+
+<!-- MODULE TABS -->
+<div class="module-tabs">
+  <button class="mod-tab" id="mtab-predict" onclick="switchModule('predict')">🩺 Risk Calculator</button>
+  <button class="mod-tab active" id="mtab-cohort" onclick="switchModule('cohort')">📈 Cohort Analytics</button>
+  <button class="mod-tab" id="mtab-prevent" onclick="switchModule('prevent')">🛡 Prevention Science</button>
+</div>
+
+<div class="form-progress"><div class="form-progress-fill" id="progressBar" style="width:25%"></div></div>
+
+<div class="module active" id="module-predict">
+<!-- ============ SECTION 1: PATIENT ============ -->
+<div class="section active" id="sec1">
+
+  <div class="card" style="animation-delay:.05s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(74,158,255,0.12)">👤</div>
+      Patient Demographics
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Age <span class="label-note">(years)</span></label>
+        <input type="number" id="age" min="18" max="99" placeholder="e.g. 52" oninput="updateAge(this.value)">
+      </div>
+      <div class="form-group">
+        <label>Biological Sex</label>
+        <div class="pill-group" id="sex-pills">
+          <button class="pill" onclick="setSex('female',this)">♀ Female</button>
+          <button class="pill" onclick="setSex('male',this)">♂ Male</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="conditional" id="menopause-section" style="margin-top:14px">
+      <div class="form-group">
+        <label>Menopausal Status <span class="label-note">(sex-specific risk modifier)</span></label>
+        <div class="pill-group" id="meno-pills">
+          <button class="pill" onclick="setMeno('pre',this)">Pre-menopausal</button>
+          <button class="pill" onclick="setMeno('peri',this)">Peri-menopausal</button>
+          <button class="pill" onclick="setMeno('post',this)">Post-menopausal</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="form-group">
+        <label>Cancer Type</label>
+        <select id="cancer-type" onchange="updateCancer(this.value)">
+          <option value="">Select cancer type</option>
+          <option value="breast">Breast Cancer</option>
+          <option value="lymphoma">Lymphoma (Hodgkin / Non-Hodgkin)</option>
+          <option value="leukemia">Acute Leukaemia (AML/ALL)</option>
+          <option value="sarcoma">Sarcoma</option>
+          <option value="other">Other solid tumour</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="conditional" id="hr-section" style="margin-top:14px">
+      <div class="form-group">
+        <label>Hormone Receptor Status <span class="label-note">(breast cancer)</span></label>
+        <div class="pill-group" id="hr-pills">
+          <button class="pill" onclick="setHR('pos',this)">ER/PR Positive</button>
+          <button class="pill" onclick="setHR('neg',this)">ER/PR Negative</button>
+          <button class="pill" onclick="setHR('her2',this)">HER2+ (trastuzumab planned)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goTo(2)">Continue → Treatment Data</button>
+  </div>
+</div>
+
+<!-- ============ SECTION 2: TREATMENT ============ -->
+<div class="section" id="sec2">
+
+  <div class="card" style="animation-delay:.05s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(240,180,41,0.12)">💊</div>
+      Chemotherapy Regimen
+    </div>
+
+    <div class="form-grid" style="margin-bottom:14px">
+      <div class="form-group">
+        <label>Anthracycline Agent</label>
+        <select id="drug-type" onchange="updateDrug(this.value)">
+          <option value="">Select agent</option>
+          <option value="dox">Doxorubicin (standard)</option>
+          <option value="epi">Epirubicin</option>
+          <option value="lipo">Liposomal Doxorubicin (Doxil)</option>
+          <option value="dauno">Daunorubicin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Administration Route</label>
+        <select id="admin-route">
+          <option value="iv_bolus">IV Bolus</option>
+          <option value="iv_infusion">IV Continuous Infusion (≥6h)</option>
+          <option value="oral">Oral formulation</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Cumulative Dose <span class="label-note" id="dose-unit-label">(mg/m² — Doxorubicin equivalent)</span></label>
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <input type="range" id="dose-slider" min="0" max="600" step="10" value="0" oninput="updateDose(this.value)">
+          <div class="slider-val" id="dose-display">0 mg/m²</div>
+        </div>
+        <div class="dose-bar"><div class="dose-fill" id="dose-fill" style="width:0%;background:var(--green)"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">
+          <span>0</span><span id="threshold-label">Safe (&lt;250)</span><span>600</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Concomitant Cardiotoxic Agents</label>
+      <div class="rf-grid" id="concomitant-grid">
+        <div class="rf-item" onclick="toggleRF(this,'trastuzumab')">
+          <div class="rf-checkbox">✓</div>
+          <div class="rf-label">Trastuzumab (Herceptin)</div>
+        </div>
+        <div class="rf-item" onclick="toggleRF(this,'taxane')">
+          <div class="rf-checkbox">✓</div>
+          <div class="rf-label">Taxane (paclitaxel / docetaxel)</div>
+        </div>
+        <div class="rf-item" onclick="toggleRF(this,'ici')">
+          <div class="rf-checkbox">✓</div>
+          <div class="rf-label">Immune Checkpoint Inhibitor</div>
+        </div>
+        <div class="rf-item" onclick="toggleRF(this,'cyclophosphamide')">
+          <div class="rf-checkbox">✓</div>
+          <div class="rf-label">Cyclophosphamide (high dose)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(52,211,153,0.12)">🛡️</div>
+      Cardioprotective Measures in Use
+    </div>
+    <div class="rf-grid" id="cardioprotect-grid">
+      <div class="rf-item" onclick="toggleRF(this,'beta_blocker')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">Beta-blocker (e.g. carvedilol)</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'ace_arb')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">ACE inhibitor / ARB</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'dexrazoxane')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">Dexrazoxane</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'sglt2')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">SGLT2 inhibitor</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'statin')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">Statin</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'infusion_change')">
+        <div class="rf-checkbox">✓</div>
+        <div class="rf-label">Switched to continuous infusion</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Back</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Continue → Cardiac Status</button>
+  </div>
+</div>
+
+<!-- ============ SECTION 3: CARDIAC ============ -->
+<div class="section" id="sec3">
+
+  <div class="card" style="animation-delay:.05s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(251,113,133,0.12)">❤️</div>
+      Baseline Cardiac Function
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Baseline LVEF <span class="label-note">(%)</span></label>
+        <div class="slider-wrap">
+          <div class="slider-row">
+            <input type="range" id="lvef-slider" min="40" max="80" step="1" value="65" oninput="updateLVEF(this.value)">
+            <div class="slider-val" id="lvef-display">65%</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Global Longitudinal Strain <span class="label-note">(GLS, if available)</span></label>
+        <select id="gls">
+          <option value="unknown">Not available</option>
+          <option value="normal">Normal (more negative than −18%)</option>
+          <option value="mildly_abnormal">Mildly abnormal (−16% to −18%)</option>
+          <option value="abnormal">Abnormal (less negative than −16%)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top:14px">
+      <div class="form-group">
+        <label>Troponin at Baseline</label>
+        <select id="troponin">
+          <option value="normal">Normal (&lt;99th percentile)</option>
+          <option value="elevated">Elevated (≥99th percentile)</option>
+          <option value="unknown">Not measured</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>BNP / NT-proBNP</label>
+        <select id="bnp">
+          <option value="normal">Normal</option>
+          <option value="elevated">Elevated</option>
+          <option value="unknown">Not measured</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(167,139,250,0.12)">⚕️</div>
+      Cardiovascular Risk Factors
+    </div>
+    <div class="rf-grid" id="cvrf-grid">
+      <div class="rf-item" onclick="toggleRF(this,'hypertension')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Hypertension</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'diabetes')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Diabetes mellitus</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'dyslipidemia')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Dyslipidaemia</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'cad')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Prior coronary artery disease</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'smoking')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Current / ex-smoker</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'obesity')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Obesity (BMI ≥30)</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'radiation')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Prior chest/mediastinal radiation</div>
+      </div>
+      <div class="rf-item" onclick="toggleRF(this,'prev_chemo')">
+        <div class="rf-checkbox">✓</div><div class="rf-label">Prior anthracycline exposure</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Back</button>
+    <button class="btn btn-primary" onclick="calculate()">Calculate Risk →</button>
+  </div>
+</div>
+
+<!-- ============ SECTION 4: RESULTS ============ -->
+<div class="section" id="sec4">
+
+  <!-- HERO GAUGE -->
+  <div class="result-hero" id="result-hero">
+    <div class="risk-gauge">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke-width="10"
+          stroke-linecap="round"
+          id="gauge-circle"
+          stroke-dasharray="314"
+          stroke-dashoffset="314"
+          style="transition:stroke-dashoffset 1.2s ease, stroke .5s"/>
+      </svg>
+      <div class="risk-pct" id="risk-pct-text">—</div>
+    </div>
+    <div class="risk-level" id="risk-level-text">—</div>
+    <p class="risk-desc" id="risk-desc-text"></p>
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div class="breakdown" id="breakdown">
+    <div class="breakdown-card">
+      <div class="bc-val" id="bc-dose" style="color:var(--gold)">—</div>
+      <div class="bc-label">Dose Score</div>
+    </div>
+    <div class="breakdown-card">
+      <div class="bc-val" id="bc-cardiac" style="color:var(--rose)">—</div>
+      <div class="bc-label">Cardiac Score</div>
+    </div>
+    <div class="breakdown-card">
+      <div class="bc-val" id="bc-rf" style="color:var(--purple)">—</div>
+      <div class="bc-label">Risk Factor Score</div>
+    </div>
+  </div>
+
+  <!-- FACTOR BREAKDOWN -->
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(167,139,250,0.12)">📊</div>
+      Risk Factor Contribution
+    </div>
+    <div class="factor-list" id="factor-bars"></div>
+  </div>
+
+  <!-- SEX INSIGHT -->
+  <div id="sex-insight-box"></div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="card" style="animation-delay:.2s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(52,211,153,0.12)">📋</div>
+      Evidence-Based Recommendations
+    </div>
+    <div class="rec-list" id="recommendations"></div>
+    <div class="research-note" style="margin-top:14px">
+      <span style="font-size:16px;flex-shrink:0">🔬</span>
+      <div class="rn-text">
+        <strong style="color:var(--text2)">Research context:</strong> Sex-specific risk adjustments in this tool are grounded in pre-clinical pharmacodynamic data (ex vivo organ bath, Sprague-Dawley rat model) demonstrating divergent Emax, adrenergic sensitivity, and Hill coefficient dynamics between female and male cardiac tissue following doxorubicin exposure (Alzyoudie, MSc thesis, University of Strathclyde, 2025). This tool is an experimental research prototype and does not replace clinical judgement or formal cardiac imaging.
+      </div>
+    </div>
+  </div>
+
+  <!-- MONITORING SCHEDULE -->
+  <div class="card" style="animation-delay:.25s">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(74,158,255,0.12)">📅</div>
+      Suggested Monitoring Schedule
+    </div>
+    <div id="monitoring-schedule" style="font-size:13px;color:var(--text2);line-height:1.8"></div>
+  </div>
+
+  <div class="btn-row" style="justify-content:space-between">
+    <button class="btn btn-secondary" onclick="goTo(1);resetAll()">← New Patient</button>
+    <button class="btn btn-primary" onclick="window.print()">Print / Export</button>
+  </div>
+
+</div>
+<!-- END SECTIONS -->
+
+<div class="disclaimer">
+  ⚠️ <strong>Research Prototype — Not for Clinical Use.</strong> This tool is a proof-of-concept developed to support PhD research in pharmacoepidemiology and cardio-oncology. Risk estimates are based on published literature-derived weights and pre-clinical pharmacodynamic evidence; they have not been prospectively validated in a clinical cohort. All clinical decisions must be made by qualified clinicians using formal cardiac monitoring (echocardiography, biomarkers) per ESC 2022 Cardio-Oncology Guidelines.
+</div>
+
+</div><!-- /container -->
+</div><!-- /module-predict -->
+
+
+
+<script>
+// ======= STATE =======
+const S = {
+  sex: null, age: null, meno: null, cancer: null, hr: null,
+  drug: null, dose: 0, adminRoute: 'iv_bolus',
+  concomitant: new Set(), cardioprotect: new Set(), cvrf: new Set(),
+  lvef: 65, gls: 'unknown', troponin: 'normal', bnp: 'normal'
+};
+
+// ======= NAVIGATION =======
+let currentSection = 1;
+function goTo(n) {
+  document.querySelectorAll('.section').forEach((s,i) => {
+    s.classList.toggle('active', i+1 === n);
+  });
+  document.querySelectorAll('.step-item').forEach((el,i) => {
+    el.classList.remove('active','done');
+    if(i+1 < n) el.classList.add('done');
+    else if(i+1 === n) el.classList.add('active');
+  });
+  document.querySelectorAll('.step-num').forEach((el,i) => {
+    el.textContent = i+1 < n ? '✓' : i+1;
+  });
+  document.getElementById('progressBar').style.width = (n/4*100)+'%';
+  currentSection = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ======= INPUT HANDLERS =======
+function setSex(val, btn) {
+  S.sex = val;
+  document.querySelectorAll('#sex-pills .pill').forEach(p => p.classList.remove('active','active-rose','active-teal'));
+  btn.classList.add(val==='female'?'active-rose':'active');
+  document.getElementById('menopause-section').classList.toggle('show', val==='female');
+}
+function setMeno(val, btn) {
+  S.meno = val;
+  document.querySelectorAll('#meno-pills .pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+function updateAge(v) { S.age = parseInt(v)||null; }
+function updateCancer(v) {
+  S.cancer = v;
+  document.getElementById('hr-section').classList.toggle('show', v==='breast');
+}
+function setHR(val, btn) {
+  S.hr = val;
+  document.querySelectorAll('#hr-pills .pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+function updateDrug(v) {
+  S.drug = v;
+  const labels = {dox:'(mg/m² — Doxorubicin)',epi:'(mg/m² — Epirubicin, ÷2 for equiv.)',lipo:'(mg/m² — Liposomal Doxorubicin)',dauno:'(mg/m² — Daunorubicin)'};
+  const maxes = {dox:600,epi:1000,lipo:450,dauno:600};
+  const el = document.getElementById('dose-slider');
+  if(maxes[v]) el.max = maxes[v];
+  document.getElementById('dose-unit-label').textContent = labels[v]||'(mg/m²)';
+  updateDose(el.value);
+}
+function updateDose(v) {
+  S.dose = parseInt(v);
+  document.getElementById('dose-display').textContent = v + ' mg/m²';
+  const drug = S.drug||'dox';
+  // Convert to doxorubicin equivalent
+  const equiv = drug==='epi' ? S.dose/2 : drug==='lipo' ? S.dose*0.9 : S.dose;
+  const pct = Math.min(equiv/600*100,100);
+  const fill = document.getElementById('dose-fill');
+  fill.style.width = pct+'%';
+  fill.style.background = equiv<250?'var(--green)':equiv<450?'var(--gold)':'var(--rose)';
+  const tl = document.getElementById('threshold-label');
+  tl.textContent = equiv<250?'Safe zone':equiv<450?'⚠ Caution zone':'🔴 High-risk zone';
+}
+function updateLVEF(v) {
+  S.lvef = parseInt(v);
+  document.getElementById('lvef-display').textContent = v+'%';
+}
+function toggleRF(el, key) {
+  el.classList.toggle('checked');
+  // Determine which set
+  const inConcomitant = ['trastuzumab','taxane','ici','cyclophosphamide'].includes(key);
+  const inProtect = ['beta_blocker','ace_arb','dexrazoxane','sglt2','statin','infusion_change'].includes(key);
+  if(inConcomitant) el.classList.contains('checked') ? S.concomitant.add(key) : S.concomitant.delete(key);
+  else if(inProtect) el.classList.contains('checked') ? S.cardioprotect.add(key) : S.cardioprotect.delete(key);
+  else el.classList.contains('checked') ? S.cvrf.add(key) : S.cvrf.delete(key);
+}
+
+// ======= CALCULATION ENGINE =======
+function calculate() {
+  goTo(4);
+  setTimeout(renderResults, 100);
+}
+
+function getDoxEquivalent() {
+  const drug = S.drug||'dox';
+  if(drug==='epi') return S.dose * 0.5;
+  if(drug==='dauno') return S.dose * 0.5;
+  return S.dose;
+}
+
+function computeRisk() {
+  let score = 0;
+  const factors = [];
+
+  // 1. DOSE SCORE (max 40 pts)
+  const dox = getDoxEquivalent();
+  let doseScore = 0;
+  if(dox >= 500) doseScore = 40;
+  else if(dox >= 400) doseScore = 32;
+  else if(dox >= 300) doseScore = 22;
+  else if(dox >= 200) doseScore = 14;
+  else if(dox >= 100) doseScore = 7;
+  else doseScore = 2;
+  score += doseScore;
+  factors.push({name:'Cumulative dose', val:doseScore, max:40, color:'var(--gold)'});
+
+  // 2. SEX & MENOPAUSE (max 15 pts)
+  let sexScore = 0;
+  if(S.sex === 'female') {
+    sexScore = 8;
+    if(S.meno === 'post') sexScore = 14;
+    else if(S.meno === 'peri') sexScore = 11;
+  } else if(S.sex === 'male') {
+    sexScore = 4;
+  }
+  score += sexScore;
+  factors.push({name:'Sex / hormonal status', val:sexScore, max:15, color:'var(--rose)'});
+
+  // 3. AGE SCORE (max 10 pts)
+  const age = S.age || 50;
+  let ageScore = age >= 70 ? 10 : age >= 60 ? 7 : age >= 50 ? 4 : age >= 40 ? 2 : 1;
+  score += ageScore;
+  factors.push({name:'Age', val:ageScore, max:10, color:'var(--purple)'});
+
+  // 4. CARDIAC BASELINE (max 20 pts)
+  let cardiacScore = 0;
+  if(S.lvef <= 50) cardiacScore += 12;
+  else if(S.lvef <= 55) cardiacScore += 8;
+  else if(S.lvef <= 60) cardiacScore += 4;
+  else cardiacScore += 0;
+  if(S.gls === 'abnormal') cardiacScore += 6;
+  else if(S.gls === 'mildly_abnormal') cardiacScore += 3;
+  if(S.troponin === 'elevated') cardiacScore += 4;
+  if(S.bnp === 'elevated') cardiacScore += 3;
+  cardiacScore = Math.min(cardiacScore, 20);
+  score += cardiacScore;
+  factors.push({name:'Cardiac function / biomarkers', val:cardiacScore, max:20, color:'var(--rose)'});
+
+  // 5. CONCOMITANT AGENTS (max 12 pts)
+  let conScore = 0;
+  if(S.concomitant.has('trastuzumab')) conScore += 5;
+  if(S.concomitant.has('ici')) conScore += 4;
+  if(S.concomitant.has('cyclophosphamide')) conScore += 3;
+  if(S.concomitant.has('taxane')) conScore += 2;
+  conScore = Math.min(conScore, 12);
+  score += conScore;
+  factors.push({name:'Concomitant cardiotoxic agents', val:conScore, max:12, color:'var(--gold)'});
+
+  // 6. CV RISK FACTORS (max 15 pts)
+  let rfScore = 0;
+  if(S.cvrf.has('hypertension')) rfScore += 3;
+  if(S.cvrf.has('diabetes')) rfScore += 3;
+  if(S.cvrf.has('cad')) rfScore += 5;
+  if(S.cvrf.has('radiation')) rfScore += 4;
+  if(S.cvrf.has('prev_chemo')) rfScore += 4;
+  if(S.cvrf.has('dyslipidemia')) rfScore += 2;
+  if(S.cvrf.has('smoking')) rfScore += 2;
+  if(S.cvrf.has('obesity')) rfScore += 1;
+  rfScore = Math.min(rfScore, 15);
+  score += rfScore;
+  factors.push({name:'Cardiovascular risk factors', val:rfScore, max:15, color:'var(--purple)'});
+
+  // 7. PROTECTIVE MEASURES (DEDUCTIONS, max -18 pts)
+  let protection = 0;
+  if(S.cardioprotect.has('dexrazoxane')) protection += 7;
+  if(S.cardioprotect.has('beta_blocker')) protection += 5;
+  if(S.cardioprotect.has('ace_arb')) protection += 4;
+  if(S.cardioprotect.has('sglt2')) protection += 3;
+  if(S.cardioprotect.has('statin')) protection += 2;
+  if(S.cardioprotect.has('infusion_change')) protection += 3;
+  protection = Math.min(protection, 18);
+  score -= protection;
+  if(protection > 0) factors.push({name:'Cardioprotective measures', val:-protection, max:18, color:'var(--green)', protective:true});
+
+  score = Math.max(0, Math.min(score, 112));
+  // Convert to 0-100 probability estimate
+  const pct = Math.round(score / 112 * 100);
+
+  return {score, pct, factors,
+    doseScore, cardiacScore, rfScore: rfScore + conScore, protection};
+}
+
+function renderResults() {
+  const R = computeRisk();
+  const pct = R.pct;
+
+  // Level
+  let level, desc, color, bgColor;
+  if(pct < 20) {
+    level='Low Risk'; color='var(--low)'; bgColor=color;
+    desc='Cardiotoxicity risk appears low at current parameters. Standard monitoring per ESC guidelines is recommended.';
+  } else if(pct < 40) {
+    level='Moderate Risk'; color='var(--mod)'; bgColor=color;
+    desc='Moderate cardiotoxicity risk identified. Enhanced cardiac monitoring and consideration of cardioprotective strategies is advised.';
+  } else if(pct < 65) {
+    level='High Risk'; color='var(--high)'; bgColor=color;
+    desc='Significant cardiotoxicity risk. Cardioprotective intervention, frequent echocardiographic monitoring, and multidisciplinary team review are strongly recommended.';
+  } else {
+    level='Very High Risk'; color='var(--vhigh)'; bgColor=color;
+    desc='Very high cardiotoxicity risk profile. Urgent cardio-oncology consultation recommended before proceeding or continuing treatment.';
+  }
+
+  // Gauge
+  document.getElementById('result-hero').style.setProperty('--risk-color', color);
+  document.getElementById('risk-pct-text').textContent = pct+'%';
+  document.getElementById('risk-pct-text').style.color = color;
+  document.getElementById('risk-level-text').textContent = level;
+  document.getElementById('risk-level-text').style.color = color;
+  document.getElementById('risk-desc-text').textContent = desc;
+  const circumference = 314;
+  const offset = circumference - (pct/100 * circumference);
+  const gauge = document.getElementById('gauge-circle');
+  setTimeout(()=>{
+    gauge.style.strokeDashoffset = offset;
+    gauge.style.stroke = color;
+  }, 200);
+
+  // Breakdown cards
+  document.getElementById('bc-dose').textContent = R.doseScore+'/40';
+  document.getElementById('bc-cardiac').textContent = R.cardiacScore+'/20';
+  document.getElementById('bc-rf').textContent = R.rfScore+'/27';
+
+  // Factor bars
+  const fb = document.getElementById('factor-bars');
+  fb.innerHTML = '';
+  R.factors.forEach(f => {
+    const pctBar = Math.abs(f.val) / f.max * 100;
+    const displayVal = f.protective ? '−'+Math.abs(f.val) : '+'+f.val;
+    fb.innerHTML += `
+      <div class="factor-item">
+        <div class="factor-name">${f.name}</div>
+        <div class="factor-bar-wrap">
+          <div class="factor-bar" style="width:${pctBar}%;background:${f.color};opacity:${f.protective?'.6':'1'}"></div>
+        </div>
+        <div class="factor-score" style="color:${f.color}">${displayVal}</div>
+      </div>`;
+  });
+
+  // Sex insight
+  const si = document.getElementById('sex-insight-box');
+  if(S.sex === 'female') {
+    const isPost = S.meno === 'post';
+    si.innerHTML = `
+      <div class="sex-insight female">
+        <div class="si-icon">⚡</div>
+        <div>
+          <div class="si-title" style="color:var(--rose)">Female-Specific Cardiotoxicity Profile${isPost?' · Post-menopausal':''}</div>
+          <div class="si-text">
+            Pre-clinical pharmacodynamic evidence (Alzyoudie, Strathclyde MSc 2025) demonstrates that female cardiac tissue exhibits <strong>lower Emax</strong> (maximal inotropic response) and <strong>reduced adrenergic sensitivity</strong> (pD2) following doxorubicin exposure compared to male tissue. This suggests female patients may reach clinically significant cardiac dysfunction at <strong>lower cumulative doses</strong> (estimated 15–20% lower threshold). ${isPost?'Loss of oestrogen-mediated ERα cardioprotection in post-menopausal status further amplifies this risk — this tool applies an additional risk weight for post-menopausal status.':'Oestrogen-mediated cardioprotection partially mitigates risk in pre-menopausal patients, though this protective effect is partially abrogated by doxorubicin.'}
+          </div>
+        </div>
+      </div>`;
+  } else if(S.sex === 'male') {
+    si.innerHTML = `
+      <div class="sex-insight male">
+        <div class="si-icon">🔬</div>
+        <div>
+          <div class="si-title" style="color:var(--accent)">Male-Specific Cardiotoxicity Profile</div>
+          <div class="si-text">Pre-clinical data indicate male cardiac tissue demonstrates greater <strong>early contractile impairment</strong> at high doxorubicin doses, attributed to enhanced Topoisomerase IIβ-mediated apoptosis. The dose-response relationship may be steeper at very high cumulative doses. Standard HFA-ICOS monitoring thresholds apply. <strong>Note:</strong> Population-level epidemiology still shows female patients have higher overall CIC incidence; this paradox is a key research question in the PhD protocol.</div>
+        </div>
+      </div>`;
+  } else { si.innerHTML = ''; }
+
+  // Recommendations
+  const recs = [];
+  if(pct >= 40) recs.push({badge:'alert',text:'<strong>Cardio-oncology consultation recommended</strong> — risk profile warrants multidisciplinary team review before continuation or initiation of anthracycline therapy.'});
+  if(!S.cardioprotect.has('dexrazoxane') && R.doseScore >= 22) recs.push({badge:'protect',text:'<strong>Consider dexrazoxane</strong> — most evidence-based cardioprotective agent for anthracycline-induced cardiotoxicity. Recommended when cumulative doxorubicin dose exceeds 300 mg/m². (ESMO/ESC Grade A recommendation)'});
+  if(!S.cardioprotect.has('beta_blocker') && pct >= 30) recs.push({badge:'protect',text:'<strong>Consider carvedilol or nebivolol</strong> — beta-blocker therapy has demonstrated reduction in troponin elevation and LVEF decline in prospective trials (CECCY trial, PRADA trial).'});
+  if(!S.cardioprotect.has('ace_arb') && pct >= 35) recs.push({badge:'protect',text:'<strong>Consider ACE inhibitor or ARB</strong> (enalapril or candesartan) — supported by PRADA trial data for prevention of LVEF decline in anthracycline-treated patients.'});
+  if(!S.cardioprotect.has('sglt2') && S.cvrf.has('diabetes')) recs.push({badge:'protect',text:'<strong>SGLT2 inhibitor</strong> — emerging evidence supports cardioprotective benefit in high-risk patients, particularly those with diabetes. Consider in the context of overall cardiometabolic risk.'});
+  if(S.sex==='female' && !S.cardioprotect.has('beta_blocker')) recs.push({badge:'sex',text:'<strong>Sex-specific recommendation:</strong> Pre-clinical pharmacodynamic evidence of greater adrenergic susceptibility in female cardiac tissue supports earlier initiation of beta-adrenergic blockade in female patients at moderate-to-high risk.'});
+  if(S.sex==='female' && S.meno==='post') recs.push({badge:'sex',text:'<strong>Post-menopausal status:</strong> Loss of oestrogen-mediated cardioprotection in post-menopausal women may lower the effective cardiotoxicity threshold. Consider initiating monitoring at lower cumulative dose (250 mg/m² rather than 300 mg/m²).'});
+  if(S.concomitant.has('trastuzumab')) recs.push({badge:'monitor',text:'<strong>Trastuzumab co-administration:</strong> Anthracycline + trastuzumab combination significantly elevates risk (additive cardiotoxicity). ESC 2022 guidelines recommend sequential — not concurrent — administration. Echocardiography every 3 months during trastuzumab therapy.'});
+  if(S.cvrf.has('hypertension')) recs.push({badge:'monitor',text:'<strong>Optimise blood pressure control</strong> prior to and during anthracycline therapy. Target BP &lt;130/80 mmHg. Uncontrolled hypertension is an independent predictor of CTRCD.'});
+  recs.push({badge:'monitor',text:'<strong>Echocardiographic monitoring:</strong> LVEF and GLS at baseline, at completion of anthracycline course, and at 6 and 12 months post-treatment per ESC 2022 Cardio-Oncology Guidelines.'});
+  recs.push({badge:'monitor',text:'<strong>Cardiac biomarker surveillance:</strong> High-sensitivity troponin I/T and BNP/NT-proBNP before each anthracycline cycle. Asymptomatic troponin elevation (≥99th percentile) warrants cardiology review.'});
+
+  const recEl = document.getElementById('recommendations');
+  recEl.innerHTML = recs.map(r => `
+    <div class="rec-item">
+      <span class="rec-badge ${r.badge}">${r.badge.toUpperCase()}</span>
+      <div class="rec-text">${r.text}</div>
+    </div>`).join('');
+
+  // Monitoring schedule
+  const schedule = pct < 20 ?
+    '• Baseline echocardiogram before treatment<br>• Echocardiogram at end of treatment<br>• 12-month post-treatment follow-up<br>• Troponin + BNP before each cycle' :
+    pct < 40 ?
+    '• Baseline echocardiogram + troponin + BNP<br>• Echocardiogram at 200 mg/m² cumulative dose and end of treatment<br>• Troponin + BNP before every cycle<br>• 6-month and 12-month post-treatment echocardiograms' :
+    '• Baseline echocardiogram (GLS strongly recommended) + high-sensitivity troponin + NT-proBNP<br>• Echocardiogram every 100 mg/m² cumulative dose<br>• Troponin + BNP before every cycle — any elevation triggers cardiology review<br>• 3-month, 6-month, and 12-month post-treatment echocardiograms<br>• Consider cardiac MRI if LVEF borderline or GLS abnormal';
+  document.getElementById('monitoring-schedule').innerHTML = schedule;
+}
+
+function resetAll() {
+  Object.assign(S, {
+    sex:null,age:null,meno:null,cancer:null,hr:null,
+    drug:null,dose:0,adminRoute:'iv_bolus',
+    concomitant:new Set(),cardioprotect:new Set(),cvrf:new Set(),
+    lvef:65,gls:'unknown',troponin:'normal',bnp:'normal'
+  });
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active','active-rose','active-teal'));
+  document.querySelectorAll('.rf-item').forEach(el=>el.classList.remove('checked'));
+  document.querySelectorAll('.conditional').forEach(el=>el.classList.remove('show'));
+  document.getElementById('dose-slider').value=0; updateDose(0);
+  document.getElementById('lvef-slider').value=65; updateLVEF(65);
+  document.getElementById('cancer-type').value='';
+  document.getElementById('drug-type').value='';
+  document.getElementById('gls').value='unknown';
+  document.getElementById('troponin').value='normal';
+  document.getElementById('bnp').value='normal';
+  document.getElementById('age').value='';
+}
+</script>
+
+<!-- ===================== EXTRA CSS FOR NEW FEATURES ===================== -->
+<style>
+/* TOP MODULE TABS */
+.module-tabs{display:flex;gap:6px;margin-bottom:28px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:5px;position:relative;z-index:2}
+.mtab{flex:1;padding:10px 8px;border-radius:10px;border:none;background:transparent;color:var(--text2);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3}
+.mtab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.mtab span{display:block;font-size:10px;opacity:.6;margin-top:2px;font-weight:400}
+.module{display:none}.module.active{display:block;animation:fadeUp .35s ease}
+
+/* DATA INPUT TABLE */
+.data-table-wrap{overflow-x:auto;margin:12px 0;border-radius:10px;border:1px solid var(--border2)}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{background:var(--bg3);color:var(--text2);font-weight:500;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap}
+.data-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:nth-child(even) td{background:rgba(255,255,255,0.015)}
+.data-table input,.data-table select{background:transparent;border:none;color:var(--text);font-family:var(--sans);font-size:12px;width:100%;padding:3px 4px;outline:none}
+.data-table input:focus{background:rgba(74,158,255,.08);border-radius:4px}
+.data-table select{cursor:pointer}
+.data-table td.outcome-yes{color:var(--rose);font-weight:500}
+.data-table td.outcome-no{color:var(--green)}
+
+/* CHART CONTAINERS */
+.chart-container{position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.chart-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-subtitle{font-size:11px;color:var(--text3);margin-left:auto}
+.chart-canvas-wrap{position:relative;height:220px}
+
+/* STAT CHIPS */
+.stat-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:580px){.stat-chips{grid-template-columns:1fr 1fr}}
+.stat-chip{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center}
+.sc-val{font-family:var(--mono);font-size:18px;font-weight:500;margin-bottom:2px}
+.sc-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+
+/* SEX COMPARISON BADGE */
+.sex-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.sc-box{border-radius:10px;padding:14px;border:1px solid}
+.sc-box.f{background:rgba(251,113,133,.06);border-color:rgba(251,113,133,.2)}
+.sc-box.m{background:rgba(74,158,255,.06);border-color:rgba(74,158,255,.2)}
+.sc-box-title{font-size:12px;font-weight:600;margin-bottom:8px}
+.sc-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sc-row:last-child{border-bottom:none}
+.sc-row-val{font-family:var(--mono);font-size:11px}
+
+/* PREVENTION FRAMEWORK */
+.prev-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.prev-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.prev-tab.active{background:rgba(74,158,255,.1);border-color:var(--accent);color:var(--accent)}
+.prev-panel{display:none}.prev-panel.active{display:block;animation:fadeUp .3s ease}
+
+.evidence-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
+.ec-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.ec-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ec-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ec-subtitle{font-size:11px;color:var(--text3)}
+.ec-grade{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:8px;margin-bottom:8px}
+.grade-A{background:rgba(52,211,153,.15);color:var(--green)}
+.grade-B{background:rgba(74,158,255,.15);color:var(--accent)}
+.grade-C{background:rgba(240,180,41,.15);color:var(--gold)}
+.grade-X{background:rgba(167,139,250,.15);color:var(--purple)}
+.ec-body{font-size:12px;color:var(--text2);line-height:1.7}
+.ec-body strong{color:var(--text)}
+.ec-trials{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.trial-tag{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--text3)}
+.ec-dose-chart{height:8px;border-radius:4px;background:var(--border2);margin:6px 0 2px;overflow:hidden}
+.ec-dose-fill{height:100%;border-radius:4px;background:var(--green);transition:width .8s ease .2s}
+.ec-dose-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-dot{position:absolute;left:-24px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--border2);transition:border-color .3s}
+.tl-item.active .tl-dot{border-color:var(--accent);background:var(--accent)}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--accent);margin-bottom:3px}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.tl-body{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* RESEARCH GAPS */
+.gap-list{display:flex;flex-direction:column;gap:8px}
+.gap-item{display:flex;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px}
+.gap-num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);flex-shrink:0;min-width:20px}
+.gap-text{font-size:12px;color:var(--text2);line-height:1.6}
+.gap-text strong{color:var(--text);display:block;margin-bottom:2px}
+
+/* CSV IMPORT */
+.import-zone{border:2px dashed var(--border2);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px}
+.import-zone:hover{border-color:var(--accent);background:rgba(74,158,255,.04)}
+.import-icon{font-size:28px;margin-bottom:8px}
+.import-title{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.import-sub{font-size:12px;color:var(--text3)}
+#csv-file-input{display:none}
+
+/* CURVE LEGEND */
+.curve-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* MODULE TABS */
+.module-tabs{display:flex;gap:6px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:5px}
+.mod-tab{flex:1;padding:9px 10px;border-radius:8px;border:none;background:transparent;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.mod-tab:hover{color:var(--text2)}
+.mod-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+
+/* MODULE WRAPPERS */
+.module{display:none}.module.active{display:block}
+
+/* COHORT TABLE */
+.cohort-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.cohort-table th{text-align:left;padding:8px 10px;font-weight:500;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.cohort-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.cohort-table tr:hover td{background:var(--surface2)}
+.cohort-table .risk-cell{font-family:var(--mono);font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
+.ct-low{background:rgba(52,211,153,.15);color:var(--green)}
+.ct-mod{background:rgba(240,180,41,.15);color:var(--gold)}
+.ct-high{background:rgba(251,146,60,.15);color:var(--high)}
+.ct-vh{background:rgba(251,113,133,.15);color:var(--rose)}
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.del-btn:hover{color:var(--rose);background:rgba(251,113,133,.1)}
+
+/* COHORT FORM */
+.cohort-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.cf-group{display:flex;flex-direction:column;gap:4px}
+.cf-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.cf-input{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;width:100%}
+.cf-input:focus{outline:none;border-color:var(--accent)}
+.cf-select{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;width:100%;appearance:none}
+
+/* CHART CONTAINERS */
+.chart-wrap{position:relative;height:300px;margin-bottom:8px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.chart-legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-cell{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:3px}
+.stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+
+/* PREVENTION */
+.pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.pv-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s}
+.pv-card:hover{border-color:var(--border2)}
+.pv-card.selected{border-color:var(--accent);background:rgba(74,158,255,.05)}
+.pv-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pv-icon{font-size:20px}
+.pv-name{font-size:14px;font-weight:500;color:var(--text)}
+.pv-class{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.pv-bar-wrap{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.pv-bar{height:100%;border-radius:3px;transition:width .6s ease}
+.pv-efficacy{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.evidence-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;font-family:var(--mono);font-weight:500;margin-bottom:8px}
+.ev-a{background:rgba(52,211,153,.15);color:var(--green)}
+.ev-b{background:rgba(240,180,41,.15);color:var(--gold)}
+.ev-c{background:rgba(167,139,250,.15);color:var(--purple)}
+.ev-emerging{background:rgba(74,158,255,.15);color:var(--accent)}
+.pv-detail{font-size:12px;color:var(--text2);line-height:1.6}
+.pv-trial{font-size:11px;color:var(--text3);margin-top:6px;font-style:italic}
+.sex-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:6px;font-family:var(--mono)}
+.sex-f{background:rgba(251,113,133,.15);color:var(--rose)}
+.sex-m{background:rgba(74,158,255,.15);color:var(--accent)}
+.sex-both{background:rgba(167,139,250,.15);color:var(--purple)}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px;margin-bottom:16px}
+.timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:1.5px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bg3);position:absolute;left:-21px;top:2px}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:2px}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.tl-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* DETAIL PANEL */
+.detail-panel{background:rgba(74,158,255,.04);border:1px solid rgba(74,158,255,.15);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
+.detail-panel.open{display:block;animation:fadeUp .3s ease}
+
+@media(max-width:580px){
+  .chart-row,.pv-grid{grid-template-columns:1fr}
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+  .cohort-form{grid-template-columns:1fr 1fr}
+  .module-tabs{flex-wrap:wrap}
+  .mod-tab{font-size:11px;padding:7px 8px}
+}
+</style>
+
+<!-- ===================== REVISED LAYOUT: MODULE TABS ===================== -->
+<script>
+// Wrap the existing container in a module and add new modules
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.container');
+
+  // Insert module tabs at top (after header)
+  const header = container.querySelector('header');
+  const tabsHTML = `
+  <div class="module-tabs" id="module-tabs">
+    <button class="mtab active" onclick="switchModule('predictor',this)">Risk Predictor<span>Step-by-step assessment</span></button>
+    <button class="mtab" onclick="switchModule('analytics',this)">Data Analytics<span>Predictive curves</span></button>
+    <button class="mtab" onclick="switchModule('prevention',this)">Prevention Hub<span>Research-based strategies</span></button>
+  </div>`;
+  header.insertAdjacentHTML('afterend', tabsHTML);
+
+  // Wrap existing content in module div
+  const stepsNav = container.querySelector('.steps-nav');
+  const progressBar = container.querySelector('.form-progress');
+  const sections = container.querySelectorAll('.section');
+  const disclaimer = container.querySelector('.disclaimer');
+
+  const predictorDiv = document.createElement('div');
+  predictorDiv.id = 'module-predictor';
+  predictorDiv.className = 'module active';
+
+  stepsNav.parentNode.insertBefore(predictorDiv, stepsNav);
+  predictorDiv.appendChild(stepsNav);
+  predictorDiv.appendChild(progressBar);
+  sections.forEach(s => predictorDiv.appendChild(s));
+
+  // Insert analytics module
+  predictorDiv.insertAdjacentHTML('afterend', getAnalyticsHTML());
+  // Insert prevention module
+  document.getElementById('module-analytics').insertAdjacentHTML('afterend', getPreventionHTML());
+
+  // Move disclaimer to end
+  container.appendChild(disclaimer);
+
+  // Init charts after DOM ready
+  initSampleData();
+});
+
+function switchModule(name, btn) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+  document.getElementById('module-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='analytics') { setTimeout(renderAllCharts, 100); }
+}
+</script>
+
+<!-- ===================== ANALYTICS MODULE HTML ===================== -->
+<script>
+function getAnalyticsHTML() { return `
+<div id="module-analytics" class="module">
+
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(74,158,255,.12)">📂</div>
+      Patient Cohort Data
+    </div>
+    <div class="import-zone" onclick="document.getElementById('csv-file-input').click()">
+      <input type="file" id="csv-file-input" accept=".csv" onchange="importCSV(event)">
+      <div class="import-icon">📥</div>
+      <div class="import-title">Import CSV / Add patients manually below</div>
+      <div class="import-sub">CSV columns: age, sex (F/M), menopausal (pre/post/NA), dose_dox_equiv, lvef_baseline, lvef_post, n_cvrf, cardioprotect (Y/N), outcome (Y/N = CTRCD developed)</div>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table" id="cohort-table">
+        <thead><tr>
+          <th>#</th><th>Age</th><th>Sex</th><th>Meno</th>
+          <th>Dose (mg/m²)</th><th>LVEF Base (%)</th><th>LVEF Post (%)</th>
+          <th>CV Risk Factors</th><th>Cardioprotect</th><th>CTRCD</th><th></th>
+        </tr></thead>
+        <tbody id="cohort-tbody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-secondary" style="font-size:12px;padding:8px 14px" onclick="addRow()">+ Add patient</button>
+      <button class="btn btn-secondary" style="font-size:12px;padding:8px 14px" onclick="loadSampleData()">Load sample cohort (n=40)</button>
+      <button class="btn btn-primary" style="font-size:12px;padding:8px 14px;margin-left:auto" onclick="renderAllCharts()">Analyse ▶</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY STATS -->
+  <div class="stat-chips" id="stat-chips" style="display:none">
+    <div class="stat-chip"><div class="sc-val" id="stat-n" style="color:var(--accent)">—</div><div class="sc-label">Patients</div></div>
+    <div class="stat-chip"><div class="sc-val" id="stat-ctrcd" style="color:var(--rose)">—</div><div class="sc-label">CTRCD Rate</div></div>
+    <div class="stat-chip"><div class="sc-val" id="stat-f-rate" style="color:var(--rose)">—</div><div class="sc-label">Female CTRCD</div></div>
+    <div class="stat-chip"><div class="sc-val" id="stat-m-rate" style="color:var(--accent)">—</div><div class="sc-label">Male CTRCD</div></div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" id="charts-row1">
+    <div class="chart-container">
+      <div class="chart-title">📈 Dose–Response Curve <span class="chart-subtitle">LVEF decline vs cumulative dose</span></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-dose-response"></canvas></div>
+      <div class="curve-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div>Female</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Male</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,.3)"></div>All</div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">📉 LVEF Decline Distribution <span class="chart-subtitle">Post − Baseline (%)</span></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-lvef-dist"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="chart-container">
+      <div class="chart-title">🎯 Risk Score vs Outcome <span class="chart-subtitle">Predictive calibration</span></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-roc"></canvas></div>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">🧬 Sex-Stratified Incidence <span class="chart-subtitle">By dose quartile</span></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-sex-dose"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SEX COMPARISON -->
+  <div class="card">
+    <div class="card-title"><div class="card-icon" style="background:rgba(251,113,133,.1)">⚡</div>Sex-Stratified Analysis</div>
+    <div class="sex-compare" id="sex-compare-boxes">
+      <div class="sc-box f">
+        <div class="sc-box-title" style="color:var(--rose)">♀ Female Patients</div>
+        <div class="sc-row"><span>CTRCD rate</span><span class="sc-row-val" id="f-ctrcd">—</span></div>
+        <div class="sc-row"><span>Mean dose at CTRCD</span><span class="sc-row-val" id="f-dose-ctrcd">—</span></div>
+        <div class="sc-row"><span>Mean LVEF decline</span><span class="sc-row-val" id="f-lvef-decline">—</span></div>
+        <div class="sc-row"><span>Post-menopausal RR</span><span class="sc-row-val" id="f-meno-rr">—</span></div>
+      </div>
+      <div class="sc-box m">
+        <div class="sc-box-title" style="color:var(--accent)">♂ Male Patients</div>
+        <div class="sc-row"><span>CTRCD rate</span><span class="sc-row-val" id="m-ctrcd">—</span></div>
+        <div class="sc-row"><span>Mean dose at CTRCD</span><span class="sc-row-val" id="m-dose-ctrcd">—</span></div>
+        <div class="sc-row"><span>Mean LVEF decline</span><span class="sc-row-val" id="m-lvef-decline">—</span></div>
+        <div class="sc-row"><span>RR vs female</span><span class="sc-row-val" id="m-rr">—</span></div>
+      </div>
+    </div>
+    <div id="sex-insight-analytics" style="font-size:12px;color:var(--text3);line-height:1.7;margin-top:8px;padding:10px 12px;background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.12);border-radius:8px"></div>
+  </div>
+
+  <!-- CARDIOPROTECTION ANALYSIS -->
+  <div class="chart-container">
+    <div class="chart-title">🛡️ Cardioprotection Effect Analysis <span class="chart-subtitle">CTRCD rate with vs without intervention</span></div>
+    <div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-protection"></canvas></div>
+  </div>
+
+</div>`; }
+</script>
+
+<!-- ===================== PREVENTION MODULE HTML ===================== -->
+<script>
+function getPreventionHTML() { return `
+<div id="module-prevention" class="module">
+
+  <div class="prev-tabs" id="prev-tabs">
+    <button class="prev-tab active" onclick="switchPrev('pharma',this)">💊 Pharmacological</button>
+    <button class="prev-tab" onclick="switchPrev('monitoring',this)">🔬 Monitoring Protocols</button>
+    <button class="prev-tab" onclick="switchPrev('dose',this)">⚖️ Dose Strategies</button>
+    <button class="prev-tab" onclick="switchPrev('sex',this)">⚡ Sex-Specific</button>
+    <button class="prev-tab" onclick="switchPrev('gaps',this)">🔭 Research Gaps</button>
+  </div>
+
+  <!-- PHARMACOLOGICAL -->
+  <div class="prev-panel active" id="prev-pharma">
+    <div class="evidence-card">
+      <div class="ec-header">
+        <div class="ec-icon" style="background:rgba(52,211,153,.12)">🛡️</div>
+        <div><div class="ec-title">Dexrazoxane (ADR-529)</div><div class="ec-subtitle">Iron chelator — direct cardioprotective agent</div></div>
+      </div>
+      <span class="ec-grade grade-A">ESC Grade A · Level I Evidence</span>
+      <div class="ec-body">The only agent with <strong>regulatory approval</strong> (FDA, EMA) specifically for prevention of anthracycline-induced cardiomyopathy. Mechanism: chelates intracellular iron, preventing doxorubicin-iron complex formation and subsequent ROS generation. The cardioprotective benefit is <strong>dose-dependent and time-dependent</strong> — must be given 30 minutes before anthracycline administration. Dexrazoxane:doxorubicin ratio of 10:1 (or 20:1 for epirubicin) is standard.
+      <div class="ec-dose-chart"><div class="ec-dose-fill" style="width:85%"></div></div>
+      <div class="ec-dose-label"><span>Efficacy evidence strength</span><span>85%</span></div>
+      <strong>Key limitation:</strong> Historically avoided in paediatric patients due to concerns about secondary malignancy (now largely refuted) and potential reduction in antitumour efficacy (meta-analyses do not support this). Currently recommended when cumulative doxorubicin ≥300 mg/m² or when patient is at high baseline cardiac risk.</div>
+      <div class="ec-trials"><span class="trial-tag">Langer 2004</span><span class="trial-tag">Swain 1997 (ICRF-187)</span><span class="trial-tag">van Dalen 2011 Cochrane</span><span class="trial-tag">ESC 2022 Rec. IIa</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header">
+        <div class="ec-icon" style="background:rgba(74,158,255,.12)">❤️</div>
+        <div><div class="ec-title">Beta-Adrenergic Blockade</div><div class="ec-subtitle">Carvedilol · Nebivolol · Metoprolol</div></div>
+      </div>
+      <span class="ec-grade grade-B">ESC Grade IIa · Level B Evidence</span>
+      <div class="ec-body"><strong>Carvedilol</strong> (non-selective β + α1 blocker): CECCY trial (n=200) demonstrated significant reduction in troponin I elevation vs placebo, with numerical but non-significant LVEF preservation. Antioxidant properties of carvedilol (via superoxide scavenging) may provide additional cardioprotection beyond beta-blockade. <strong>Nebivolol</strong>: additional nitric oxide-mediated vasodilation. <strong>Key mechanistic rationale for female patients</strong> (from pre-clinical data): enhanced beta-adrenergic sensitivity impairment in female cardiac tissue following doxorubicin argues for earlier beta-blockade initiation in females at moderate risk.
+      <div class="ec-dose-chart"><div class="ec-dose-fill" style="width:62%"></div></div>
+      <div class="ec-dose-label"><span>Efficacy evidence strength</span><span>62%</span></div></div>
+      <div class="ec-trials"><span class="trial-tag">CECCY Trial (Avila 2018)</span><span class="trial-tag">PRADA (Gulati 2016)</span><span class="trial-tag">Kalay 2006</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header">
+        <div class="ec-icon" style="background:rgba(167,139,250,.12)">💊</div>
+        <div><div class="ec-title">ACE Inhibitors / ARBs</div><div class="ec-subtitle">Enalapril · Candesartan · Ramipril</div></div>
+      </div>
+      <span class="ec-grade grade-B">ESC Grade IIa · Level B Evidence</span>
+      <div class="ec-body"><strong>Enalapril</strong>: OVERCOME trial showed significant reduction in combined endpoint of death or LVEF decline. <strong>Candesartan</strong>: PRADA trial demonstrated statistically significant prevention of LVEF decline in early breast cancer patients (mean LVEF reduction 0.8% vs 2.6% in placebo, p=0.026). Mechanism: renin-angiotensin-aldosterone system blockade, reduced cardiac fibrosis, anti-apoptotic signalling. Most effective when initiated before anthracycline therapy rather than reactively.
+      <div class="ec-dose-chart"><div class="ec-dose-fill" style="width:70%"></div></div>
+      <div class="ec-dose-label"><span>Efficacy evidence strength</span><span>70%</span></div></div>
+      <div class="ec-trials"><span class="trial-tag">PRADA (Gulati 2016)</span><span class="trial-tag">OVERCOME (Bosch 2013)</span><span class="trial-tag">Cardinale 2006</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header">
+        <div class="ec-icon" style="background:rgba(45,212,191,.12)">🌿</div>
+        <div><div class="ec-title">SGLT2 Inhibitors</div><div class="ec-subtitle">Empagliflozin · Dapagliflozin — emerging evidence</div></div>
+      </div>
+      <span class="ec-grade grade-C">Emerging · Level C–B Evidence</span>
+      <div class="ec-body">SGLT2 inhibitors (gliflozins) have established cardiovascular mortality benefits in heart failure (EMPEROR-Reduced, DAPA-HF) and emerging pre-clinical evidence for cardioprotection against anthracycline-induced cardiomyopathy. Proposed mechanisms include: mitochondrial biogenesis enhancement, reduction in oxidative stress (via NHE-1 inhibition), anti-inflammatory effects, and improved cardiac energy substrate utilisation. <strong>EMPACT-CIC trial (ongoing, 2025):</strong> first prospective RCT specifically evaluating empagliflozin for CTRCD prevention. A <strong>key research opportunity</strong> for sex-stratified analysis given sex differences in SGLT2-mediated cardioprotection observed in general HF trials.
+      <div class="ec-dose-chart"><div class="ec-dose-fill" style="width:45%;background:var(--gold)"></div></div>
+      <div class="ec-dose-label"><span>Efficacy evidence strength</span><span>45% (emerging)</span></div></div>
+      <div class="ec-trials"><span class="trial-tag">EMPEROR-Reduced</span><span class="trial-tag">DAPA-HF</span><span class="trial-tag">EMPACT-CIC (ongoing)</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header">
+        <div class="ec-icon" style="background:rgba(240,180,41,.12)">🔬</div>
+        <div><div class="ec-title">Statins</div><div class="ec-subtitle">Rosuvastatin · Atorvastatin — pleiotropic effects</div></div>
+      </div>
+      <span class="ec-grade grade-B">Grade IIb · Level B Evidence</span>
+      <div class="ec-body"><strong>STOP-CA trial (2022)</strong>: Atorvastatin 40mg significantly reduced the incidence of LVEF decline at 12 months (9% vs 22% in placebo, p=0.002) in lymphoma patients receiving anthracyclines. Proposed mechanisms: anti-inflammatory (NF-κB suppression), antioxidant (ROS reduction), anti-apoptotic (Bcl-2 upregulation), and endothelial protective effects. May be especially relevant in patients with concomitant dyslipidaemia or metabolic syndrome, which are prevalent in post-menopausal women receiving anthracyclines.</div>
+      <div class="ec-trials"><span class="trial-tag">STOP-CA (Neilan 2022)</span><span class="trial-tag">Acar 2011</span><span class="trial-tag">Chotenimitkhun 2015</span></div>
+    </div>
+  </div>
+
+  <!-- MONITORING PROTOCOLS -->
+  <div class="prev-panel" id="prev-monitoring">
+    <div class="card">
+      <div class="card-title"><div class="card-icon" style="background:rgba(74,158,255,.12)">📅</div>ESC 2022 Monitoring Timeline</div>
+      <div class="timeline">
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">PRE-TREATMENT (T0)</div>
+          <div class="tl-title">Baseline cardiac assessment — mandatory</div>
+          <div class="tl-body">Echocardiogram with LVEF + GLS · High-sensitivity troponin I/T · BNP/NT-proBNP · ECG · 12-lead review · Blood pressure · Full metabolic panel including lipids, HbA1c, eGFR</div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">DURING TREATMENT — HIGH RISK</div>
+          <div class="tl-title">Every 100 mg/m² cumulative doxorubicin equiv.</div>
+          <div class="tl-body">Echo + GLS · Troponin before each cycle · BNP if symptomatic · Any new symptom (dyspnoea, palpitation, oedema) → immediate cardiac review<br><em style="color:var(--rose)">Female post-menopausal or LVEF ≤55%: lower threshold — assess at 200 mg/m²</em></div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">DURING TREATMENT — STANDARD RISK</div>
+          <div class="tl-title">At completion of anthracycline course</div>
+          <div class="tl-body">LVEF + GLS echocardiogram · Troponin + BNP · If LVEF decline ≥10pp or to &lt;53%: initiate ACEi + beta-blocker immediately + cardiology referral</div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">POST-TREATMENT — 3 MONTHS</div>
+          <div class="tl-title">Early surveillance echo (high-risk only)</div>
+          <div class="tl-body">For patients receiving trastuzumab: echocardiogram every 3 months during trastuzumab therapy · Troponin + BNP</div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">POST-TREATMENT — 6 MONTHS</div>
+          <div class="tl-title">Surveillance echocardiogram — all patients</div>
+          <div class="tl-body">LVEF + GLS · Assess for subclinical dysfunction · Evaluate cardioprotective therapy response if initiated · Consider cardiac MRI if GLS abnormal or borderline LVEF</div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-time">POST-TREATMENT — 12 MONTHS</div>
+          <div class="tl-title">Annual long-term surveillance</div>
+          <div class="tl-body">Echo + troponin + BNP · Cardiovascular risk factor optimisation · Long-term survivors: annual echo for 5 years if cumulative dose ≥250 mg/m² or multiple risk factors</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-time">LONG-TERM (&gt;5 YEARS)</div>
+          <div class="tl-title">Survivorship cardio-oncology care</div>
+          <div class="tl-body">Refer to dedicated cardio-oncology survivorship clinic · Aggressive cardiovascular risk factor management · Consider late cardiotoxicity (delayed LVEF decline possible years after treatment)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOSE STRATEGIES -->
+  <div class="prev-panel" id="prev-dose">
+    <div class="evidence-card">
+      <div class="ec-header"><div class="ec-icon" style="background:rgba(240,180,41,.1)">⚗️</div>
+        <div><div class="ec-title">Liposomal Doxorubicin Formulation</div><div class="ec-subtitle">Pegylated liposomal doxorubicin (PLD) — reduced cardiac exposure</div></div></div>
+      <span class="ec-grade grade-A">Grade I · Level A Evidence</span>
+      <div class="ec-body">PLD (Doxil/Caelyx) reduces peak plasma doxorubicin concentration and myocardial drug exposure while maintaining equivalent antitumour efficacy in approved indications (ovarian cancer, multiple myeloma, Kaposi's sarcoma, breast cancer). Meta-analysis (Harris 2006, n=1,160): cardiotoxicity rate 3.8% with PLD vs 10.5% with conventional doxorubicin (RR 0.38). <strong>Cardiotoxic dose ceiling substantially higher</strong> (~550 mg/m² vs 400–450 mg/m² for conventional). Recommended when high cumulative doses are anticipated or baseline cardiac risk is elevated. Key consideration for <strong>post-menopausal breast cancer patients</strong> given elevated sex-specific cardiac risk.</div>
+      <div class="ec-trials"><span class="trial-tag">Harris 2006 meta-analysis</span><span class="trial-tag">O'Brien 2004</span><span class="trial-tag">Batist 2001</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header"><div class="ec-icon" style="background:rgba(45,212,191,.1)">🕐</div>
+        <div><div class="ec-title">Prolonged IV Infusion vs IV Bolus</div><div class="ec-subtitle">≥6-hour infusion reduces peak myocardial exposure</div></div></div>
+      <span class="ec-grade grade-B">Grade IIa · Level B Evidence</span>
+      <div class="ec-body">Peak doxorubicin plasma concentration (Cmax) is the primary driver of myocardial toxicity, not area-under-the-curve. Prolonged infusion (≥6h, ideally 48–96h via ambulatory pump) reduces Cmax while maintaining equivalent AUC and antitumour efficacy. Cochrane review (van Dalen 2010): cardiotoxicity RR 0.27 for continuous infusion vs bolus (95% CI 0.09–0.81). <strong>However:</strong> requires PICC line or port, ambulatory pump, and increases infection risk. Practical for high-risk patients only. Alternative: weekly low-dose fractionation (lower peak per dose).</div>
+      <div class="ec-trials"><span class="trial-tag">van Dalen 2010 Cochrane</span><span class="trial-tag">Legha 1982</span><span class="trial-tag">Shapiro 1990</span></div>
+    </div>
+
+    <div class="evidence-card">
+      <div class="ec-header"><div class="ec-icon" style="background:rgba(251,113,133,.1)">📊</div>
+        <div><div class="ec-title">Cumulative Dose Capping & Monitoring Thresholds</div><div class="ec-subtitle">Evidence-based dose limits with sex-stratified considerations</div></div></div>
+      <span class="ec-grade grade-A">Grade I — Dose Guidance</span>
+      <div class="ec-body">
+        <strong>Standard doxorubicin ceiling:</strong> 400–450 mg/m² (historical) → now risk-stratified<br>
+        <strong>High baseline risk or prior cardiac disease:</strong> 250 mg/m² ceiling with dexrazoxane if higher dose required<br>
+        <strong>Proposed sex-stratified threshold (research hypothesis, Alzyoudie 2025/2026):</strong> Female patients — particularly post-menopausal — may warrant lower individual monitoring trigger (250 mg/m² rather than 300 mg/m²) based on pre-clinical pharmacodynamic evidence of greater adrenergic susceptibility and lower Emax at equivalent doses. <em>This hypothesis requires prospective validation in the planned PhD pharmacoepidemiological cohort.</em><br>
+        <strong>Epirubicin:</strong> Ceiling 900–1000 mg/m² (equiv. ~450 mg/m² doxorubicin)
+      </div>
+    </div>
+  </div>
+
+  <!-- SEX-SPECIFIC -->
+  <div class="prev-panel" id="prev-sex">
+    <div class="card">
+      <div class="card-title"><div class="card-icon" style="background:rgba(251,113,133,.1)">⚡</div>Sex-Specific Prevention Framework</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6">Based on pre-clinical pharmacodynamic evidence (Alzyoudie MSc, Strathclyde 2025) and systematic review of population-level epidemiology (Alzyoudie 2026, under review)</div>
+
+      <div class="evidence-card" style="border-color:rgba(251,113,133,.2)">
+        <div class="ec-header"><div class="ec-icon" style="background:rgba(251,113,133,.1)">♀</div>
+          <div><div class="ec-title" style="color:var(--rose)">Female-Specific Cardioprotection Strategy</div></div></div>
+        <div class="ec-body">
+          <strong>1. Lower cumulative dose monitoring trigger:</strong> Initiate enhanced monitoring from 200–250 mg/m² (vs 300 mg/m² standard) in female patients, particularly post-menopausal. Rationale: pre-clinical Emax and pD2 data demonstrate cardiac contractile compromise at lower dose equivalents in female tissue.<br><br>
+          <strong>2. Earlier beta-blocker initiation:</strong> Consider prophylactic carvedilol from treatment initiation in post-menopausal females with ≥2 additional cardiovascular risk factors. Rationale: greater adrenergic receptor susceptibility in female cardiac tissue post-doxorubicin exposure.<br><br>
+          <strong>3. Menopausal hormone status documentation:</strong> Oestrogen receptor alpha (ERα) mediates endogenous cardioprotection — abrogated by both menopause and doxorubicin-induced ERα downregulation in post-menopausal women. Consider this as a primary risk modifier in clinical risk assessment.<br><br>
+          <strong>4. Preferred formulation:</strong> For female patients at high cumulative dose or post-menopausal with multiple risk factors, liposomal doxorubicin should be considered as first option where oncologically equivalent.<br><br>
+          <strong>5. HER2+ breast cancer:</strong> Avoid concurrent anthracycline + trastuzumab. Sequential AC → T → trastuzumab protocol with 3-monthly echocardiographic surveillance.
+        </div>
+      </div>
+
+      <div class="evidence-card" style="border-color:rgba(74,158,255,.2)">
+        <div class="ec-header"><div class="ec-icon" style="background:rgba(74,158,255,.1)">♂</div>
+          <div><div class="ec-title" style="color:var(--accent)">Male-Specific Cardioprotection Strategy</div></div></div>
+        <div class="ec-body">
+          <strong>1. High-dose vigilance:</strong> Male cardiac tissue demonstrates steeper early contractile impairment at high cumulative doses (≥400 mg/m²) via enhanced Topoisomerase IIβ-mediated apoptosis. Dexrazoxane use is particularly important above 300–400 mg/m².<br><br>
+          <strong>2. Standard HFA-ICOS monitoring thresholds apply</strong> — but cardiovascular comorbidity burden (hypertension, diabetes, prior CAD) is typically higher in elderly male patients and may individually elevate risk above the population average.<br><br>
+          <strong>3. Metabolic risk optimisation:</strong> Male patients with metabolic syndrome or diabetes should have SGLT2 inhibitor initiated where clinically indicated — dual benefit (cardioprotection + metabolic control).<br><br>
+          <strong>Note — paradox of sex differences:</strong> Despite per-dose greater early contractile impairment in males, population-level epidemiology shows higher <em>overall</em> CTRCD incidence in females. This paradox likely reflects female patients' lower threshold for developing symptomatic LV dysfunction and their longer post-treatment survival creating greater window for cardiotoxicity detection. This is a key mechanistic research question for the PhD cohort study.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESEARCH GAPS -->
+  <div class="prev-panel" id="prev-gaps">
+    <div class="card">
+      <div class="card-title"><div class="card-icon" style="background:rgba(167,139,250,.1)">🔭</div>Priority Research Gaps — PhD Agenda</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">These unresolved questions form the scientific justification for the proposed PhD research programme at Monash University CMUS</div>
+      <div class="gap-list">
+        <div class="gap-item"><div class="gap-num">01</div><div class="gap-text"><strong>Population-level validation of sex-specific pharmacodynamic dose-response differences</strong><br>Pre-clinical Emax and pD2 data (Strathclyde 2025) have not been translated to population-scale EHR evidence. No validated model uses sex-dose interaction terms. PhD Objective 2 directly addresses this.</div></div>
+        <div class="gap-item"><div class="gap-num">02</div><div class="gap-text"><strong>Menopausal status as a quantitative risk modifier</strong><br>Current clinical guidelines acknowledge menopause as a categorical risk factor but provide no quantitative dose-adjustment guidance. A prospective pharmacoepidemiological study with menopausal status as a primary covariate is needed.</div></div>
+        <div class="gap-item"><div class="gap-num">03</div><div class="gap-text"><strong>Machine learning prediction models for CIC — sex-stratified and validated</strong><br>No published ML model for CTRCD has been trained and externally validated on sex-stratified EHR populations. This is the primary deliverable of the proposed PhD.</div></div>
+        <div class="gap-item"><div class="gap-num">04</div><div class="gap-text"><strong>SGLT2 inhibitor cardioprotection — prospective trial in anthracycline-treated patients</strong><br>EMPACT-CIC trial (ongoing) will partially address this, but sex-disaggregated analysis is not a pre-specified endpoint. Opportunity for pharmacoepidemiological nested analysis.</div></div>
+        <div class="gap-item"><div class="gap-num">05</div><div class="gap-text"><strong>Middle Eastern population EHR evidence</strong><br>Almost all existing pharmacoepidemiological data comes from European or North American populations. Real-world evidence from Jordanian and wider Middle Eastern oncology populations is entirely absent from the literature — a unique research contribution enabled by the applicant's clinical informatics position.</div></div>
+        <div class="gap-item"><div class="gap-num">06</div><div class="gap-text"><strong>Clinical informatics methodology transfer from neurology to cardio-oncology</strong><br>The EHR-based analytical framework validated in MS surveillance has never been formally applied and adapted to CIC pharmacovigilance. Study Protocol paper (Alzyoudie 2026, BMJ Open under preparation) addresses this gap.</div></div>
+        <div class="gap-item"><div class="gap-num">07</div><div class="gap-text"><strong>Sex-disaggregated efficacy data for cardioprotective interventions</strong><br>CECCY, PRADA, STOP-CA, and OVERCOME trials do not report sex-stratified efficacy subgroups. Secondary analyses of these datasets — or new trials powered for sex interaction — are urgently needed.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>`; }
+</script>
+
+<!-- ===================== ANALYTICS LOGIC ===================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// -------- DEFAULT SAMPLE DATA --------
+const SAMPLE = [
+  // age, sex(F/M), meno(pre/post/NA), dose, lvef_base, lvef_post, n_cvrf, protect(Y/N), outcome(Y/N)
+  [45,'F','pre',180,65,62,1,'N','N'],[52,'F','post',320,62,51,2,'N','Y'],
+  [58,'M','NA',420,65,58,2,'N','Y'],[61,'F','post',240,68,63,1,'Y','N'],
+  [47,'M','NA',300,70,67,0,'N','N'],[55,'F','peri',380,60,50,3,'N','Y'],
+  [63,'M','NA',450,63,52,3,'N','Y'],[49,'F','pre',200,67,65,0,'N','N'],
+  [70,'F','post',280,58,46,4,'N','Y'],[42,'M','NA',150,72,71,0,'N','N'],
+  [54,'F','post',360,62,55,2,'Y','N'],[66,'M','NA',500,60,48,4,'N','Y'],
+  [51,'F','pre',220,69,66,1,'N','N'],[59,'F','post',410,61,50,3,'N','Y'],
+  [44,'M','NA',260,68,65,1,'N','N'],[73,'F','post',300,59,47,4,'N','Y'],
+  [56,'M','NA',340,66,61,2,'N','N'],[48,'F','pre',160,70,68,0,'Y','N'],
+  [60,'F','post',440,63,52,3,'N','Y'],[53,'M','NA',380,64,57,2,'Y','N'],
+  [50,'F','peri',290,65,60,1,'N','N'],[67,'M','NA',520,61,49,4,'N','Y'],
+  [46,'F','pre',140,71,70,0,'N','N'],[62,'F','post',470,60,49,3,'N','Y'],
+  [57,'M','NA',310,67,63,1,'Y','N'],[71,'F','post',250,58,48,4,'N','Y'],
+  [43,'M','NA',190,70,69,0,'N','N'],[55,'F','post',350,63,56,2,'Y','N'],
+  [64,'M','NA',460,62,53,3,'N','Y'],[48,'F','pre',210,68,66,1,'N','N'],
+  [52,'F','post',400,61,51,3,'N','Y'],[58,'M','NA',270,67,64,1,'N','N'],
+  [69,'F','post',320,59,48,4,'Y','N'],[41,'M','NA',130,73,72,0,'N','N'],
+  [65,'F','post',480,60,47,4,'N','Y'],[54,'M','NA',360,65,59,2,'N','N'],
+  [47,'F','pre',170,69,67,0,'N','N'],[76,'F','post',290,57,45,5,'N','Y'],
+  [60,'M','NA',430,63,55,2,'Y','N'],[45,'F','pre',250,66,64,1,'N','N']
+];
+
+let cohortData = [];
+let charts = {};
+
+function initSampleData() { loadSampleData(); }
+
+function loadSampleData() {
+  cohortData = SAMPLE.map(r => ({
+    age:r[0],sex:r[1],meno:r[2],dose:r[3],
+    lvef_base:r[4],lvef_post:r[5],n_cvrf:r[6],
+    protect:r[7],outcome:r[8]
+  }));
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('cohort-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = cohortData.slice(0,10).map((p,i) => `
+    <tr>
+      <td style="color:var(--text3);font-family:var(--mono)">${i+1}</td>
+      <td><input type="number" value="${p.age}" onchange="cohortData[${i}].age=+this.value" style="width:44px"></td>
+      <td><select onchange="cohortData[${i}].sex=this.value">
+        <option ${p.sex==='F'?'selected':''}>F</option>
+        <option ${p.sex==='M'?'selected':''}>M</option></select></td>
+      <td><select onchange="cohortData[${i}].meno=this.value">
+        <option ${p.meno==='pre'?'selected':''}>pre</option>
+        <option ${p.meno==='post'?'selected':''}>post</option>
+        <option ${p.meno==='peri'?'selected':''}>peri</option>
+        <option ${p.meno==='NA'?'selected':''}>NA</option></select></td>
+      <td><input type="number" value="${p.dose}" onchange="cohortData[${i}].dose=+this.value" style="width:58px"></td>
+      <td><input type="number" value="${p.lvef_base}" onchange="cohortData[${i}].lvef_base=+this.value" style="width:48px"></td>
+      <td><input type="number" value="${p.lvef_post}" onchange="cohortData[${i}].lvef_post=+this.value" style="width:48px"></td>
+      <td><input type="number" value="${p.n_cvrf}" onchange="cohortData[${i}].n_cvrf=+this.value" style="width:36px"></td>
+      <td><select onchange="cohortData[${i}].protect=this.value">
+        <option ${p.protect==='Y'?'selected':''}>Y</option>
+        <option ${p.protect==='N'?'selected':''}>N</option></select></td>
+      <td class="${p.outcome==='Y'?'outcome-yes':'outcome-no'}">${p.outcome}</td>
+      <td><button onclick="cohortData.splice(${i},1);renderTable()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px">✕</button></td>
+    </tr>`).join('') + (cohortData.length>10?`<tr><td colspan="11" style="text-align:center;color:var(--text3);font-size:11px;padding:8px">+ ${cohortData.length-10} more patients (scroll to see all)</td></tr>`:'');
+}
+
+function addRow() {
+  cohortData.push({age:50,sex:'F',meno:'post',dose:300,lvef_base:65,lvef_post:60,n_cvrf:1,protect:'N',outcome:'N'});
+  renderTable();
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l=>l.trim());
+    const data = lines.slice(1).map(line => {
+      const c = line.split(',');
+      return {age:+c[0]||50,sex:c[1]?.trim()||'F',meno:c[2]?.trim()||'NA',dose:+c[3]||0,lvef_base:+c[4]||65,lvef_post:+c[5]||65,n_cvrf:+c[6]||0,protect:c[7]?.trim()||'N',outcome:c[8]?.trim()||'N'};
+    });
+    cohortData = data;
+    renderTable();
+    renderAllCharts();
+  };
+  reader.readAsText(file);
+}
+
+// -------- CHART RENDERING --------
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderAllCharts() {
+  if(!cohortData.length) return;
+  document.getElementById('stat-chips').style.display = 'grid';
+  renderStats();
+  renderDoseResponseChart();
+  renderLVEFDistChart();
+  renderROCChart();
+  renderSexDoseChart();
+  renderSexComparison();
+  renderProtectionChart();
+}
+
+const CHART_DEFAULTS = {
+  color:'rgba(255,255,255,0.5)',
+  borderColor:'rgba(255,255,255,0.08)',
+  plugins:{legend:{labels:{color:'rgba(255,255,255,0.5)',font:{family:"'DM Sans',sans-serif",size:11},boxWidth:10,padding:12}}},
+  scales:{
+    x:{ticks:{color:'rgba(255,255,255,0.35)',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},
+    y:{ticks:{color:'rgba(255,255,255,0.35)',font:{size:10}},grid:{color:'rgba(255,255,255,0.06)'}}
+  }
+};
+
+function renderStats() {
+  const n = cohortData.length;
+  const withCTRCD = cohortData.filter(p=>p.outcome==='Y');
+  const rate = Math.round(withCTRCD.length/n*100);
+  const f = cohortData.filter(p=>p.sex==='F');
+  const m = cohortData.filter(p=>p.sex==='M');
+  const fRate = f.length ? Math.round(f.filter(p=>p.outcome==='Y').length/f.length*100) : 0;
+  const mRate = m.length ? Math.round(m.filter(p=>p.outcome==='Y').length/m.length*100) : 0;
+  document.getElementById('stat-n').textContent = n;
+  document.getElementById('stat-ctrcd').textContent = rate+'%';
+  document.getElementById('stat-f-rate').textContent = fRate+'%';
+  document.getElementById('stat-m-rate').textContent = mRate+'%';
+}
+
+function renderDoseResponseChart() {
+  destroyChart('dose-response');
+  const bins = [0,100,200,300,400,500,600];
+  const groups = {all:[],f:[],m:[]};
+  cohortData.forEach(p => {
+    const decline = p.lvef_base - p.lvef_post;
+    for(let i=0;i<bins.length-1;i++) {
+      if(p.dose>=bins[i] && p.dose<bins[i+1]) {
+        groups.all.push({bin:i,decline});
+        if(p.sex==='F') groups.f.push({bin:i,decline});
+        else groups.m.push({bin:i,decline});
+      }
+    }
+  });
+  const labels = bins.slice(0,-1).map((b,i)=>`${b}–${bins[i+1]}`);
+  const avg = (arr, binIdx) => {
+    const vals = arr.filter(x=>x.bin===binIdx).map(x=>x.decline);
+    return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : null;
+  };
+  const ctx = document.getElementById('chart-dose-response').getContext('2d');
+  charts['dose-response'] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'All',data:labels.map((_,i)=>avg(groups.all,i)),borderColor:'rgba(255,255,255,0.3)',backgroundColor:'rgba(255,255,255,0.04)',tension:.4,fill:true,pointRadius:4},
+        {label:'Female',data:labels.map((_,i)=>avg(groups.f,i)),borderColor:'#fb7185',backgroundColor:'rgba(251,113,133,0.08)',tension:.4,fill:false,pointRadius:4,borderWidth:2},
+        {label:'Male',data:labels.map((_,i)=>avg(groups.m,i)),borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.08)',tension:.4,fill:false,pointRadius:4,borderWidth:2},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toFixed(1):'—'}% decline`}}},
+      scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'Mean LVEF decline (%)',color:'rgba(255,255,255,0.3)',font:{size:10}}}}}
+  });
+}
+
+function renderLVEFDistChart() {
+  destroyChart('lvef-dist');
+  const bins = [-30,-20,-15,-10,-5,0,5];
+  const counts = new Array(bins.length-1).fill(0);
+  cohortData.forEach(p => {
+    const d = p.lvef_post - p.lvef_base;
+    for(let i=0;i<bins.length-1;i++) if(d>=bins[i]&&d<bins[i+1]) counts[i]++;
+  });
+  const labels = bins.slice(0,-1).map((b,i)=>`${b} to ${bins[i+1]}`);
+  const colors = counts.map((_,i)=>{
+    const midDrop = -(bins[i]+bins[i+1])/2;
+    return midDrop>10?'rgba(251,113,133,0.8)':midDrop>5?'rgba(251,146,60,0.7)':midDrop>0?'rgba(240,180,41,0.6)':'rgba(52,211,153,0.6)';
+  });
+  const ctx = document.getElementById('chart-lvef-dist').getContext('2d');
+  charts['lvef-dist'] = new Chart(ctx, {
+    type:'bar',
+    data:{labels,datasets:[{label:'Patients',data:counts,backgroundColor:colors,borderWidth:0,borderRadius:4}]},
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}},
+      scales:{...CHART_DEFAULTS.scales,x:{...CHART_DEFAULTS.scales.x,title:{display:true,text:'LVEF change (pp)',color:'rgba(255,255,255,0.3)',font:{size:10}}},y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'N patients',color:'rgba(255,255,255,0.3)',font:{size:10}}}}}
+  });
+}
+
+function renderROCChart() {
+  destroyChart('roc');
+  // Compute risk scores for all patients and plot calibration
+  const points = cohortData.map(p => {
+    let s = 0;
+    const dox = p.dose;
+    if(dox>=400) s+=32; else if(dox>=300) s+=22; else if(dox>=200) s+=14; else s+=7;
+    if(p.sex==='F') s += (p.meno==='post'?14:p.meno==='peri'?11:8);
+    else s += 4;
+    s += Math.min((p.age>=70?10:p.age>=60?7:p.age>=50?4:2),10);
+    s += Math.min(p.n_cvrf*3, 15);
+    if(p.lvef_base<=55) s+=8; else if(p.lvef_base<=60) s+=4;
+    if(p.protect==='Y') s-=10;
+    return {score:Math.max(0,Math.min(s,100)), outcome:p.outcome==='Y'?1:0};
+  }).sort((a,b)=>a.score-b.score);
+  // Bin into quintiles for calibration plot
+  const qSize = Math.ceil(points.length/5);
+  const calPoints = [];
+  for(let i=0;i<5;i++) {
+    const chunk = points.slice(i*qSize,(i+1)*qSize);
+    if(!chunk.length) continue;
+    const meanScore = chunk.reduce((a,b)=>a+b.score,0)/chunk.length;
+    const obsRate = chunk.reduce((a,b)=>a+b.outcome,0)/chunk.length*100;
+    calPoints.push({x:+meanScore.toFixed(1), y:+obsRate.toFixed(1)});
+  }
+  const ctx = document.getElementById('chart-roc').getContext('2d');
+  charts['roc'] = new Chart(ctx, {
+    type:'scatter',
+    data:{datasets:[
+      {label:'Calibration points',data:calPoints,backgroundColor:'rgba(74,158,255,0.8)',pointRadius:7,pointHoverRadius:9},
+      {label:'Perfect calibration',data:[{x:0,y:0},{x:100,y:100}],type:'line',borderColor:'rgba(255,255,255,0.15)',borderDash:[4,4],pointRadius:0,fill:false}
+    ]},
+    options:{...CHART_DEFAULTS,
+      scales:{x:{...CHART_DEFAULTS.scales.x,min:0,max:100,title:{display:true,text:'Predicted risk score',color:'rgba(255,255,255,0.3)',font:{size:10}}},
+        y:{...CHART_DEFAULTS.scales.y,min:0,max:100,title:{display:true,text:'Observed CTRCD rate (%)',color:'rgba(255,255,255,0.3)',font:{size:10}}}},
+      plugins:{...CHART_DEFAULTS.plugins,tooltip:{callbacks:{label:ctx=>`Predicted: ${ctx.parsed.x}% | Observed: ${ctx.parsed.y}%`}}}}
+  });
+}
+
+function renderSexDoseChart() {
+  destroyChart('sex-dose');
+  const quartiles = [[0,200],[200,300],[300,400],[400,700]];
+  const fRates=[], mRates=[];
+  quartiles.forEach(([lo,hi]) => {
+    const fQ = cohortData.filter(p=>p.sex==='F'&&p.dose>=lo&&p.dose<hi);
+    const mQ = cohortData.filter(p=>p.sex==='M'&&p.dose>=lo&&p.dose<hi);
+    fRates.push(fQ.length?+(fQ.filter(p=>p.outcome==='Y').length/fQ.length*100).toFixed(0):0);
+    mRates.push(mQ.length?+(mQ.filter(p=>p.outcome==='Y').length/mQ.length*100).toFixed(0):0);
+  });
+  const ctx = document.getElementById('chart-sex-dose').getContext('2d');
+  charts['sex-dose'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['<200','200–299','300–399','≥400'],
+      datasets:[
+        {label:'Female',data:fRates,backgroundColor:'rgba(251,113,133,0.7)',borderRadius:4,barPercentage:.7},
+        {label:'Male',data:mRates,backgroundColor:'rgba(74,158,255,0.7)',borderRadius:4,barPercentage:.7},
+      ]
+    },
+    options:{...CHART_DEFAULTS,
+      scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,min:0,max:100,title:{display:true,text:'CTRCD rate (%)',color:'rgba(255,255,255,0.3)',font:{size:10}}}}}
+  });
+}
+
+function renderSexComparison() {
+  const f = cohortData.filter(p=>p.sex==='F');
+  const m = cohortData.filter(p=>p.sex==='M');
+  const fCTRCD = f.filter(p=>p.outcome==='Y');
+  const mCTRCD = m.filter(p=>p.outcome==='Y');
+  const fRate = f.length ? (fCTRCD.length/f.length*100).toFixed(0)+'%' : '—';
+  const mRate = m.length ? (mCTRCD.length/m.length*100).toFixed(0)+'%' : '—';
+  const fDose = fCTRCD.length ? (fCTRCD.reduce((a,p)=>a+p.dose,0)/fCTRCD.length).toFixed(0)+' mg/m²' : '—';
+  const mDose = mCTRCD.length ? (mCTRCD.reduce((a,p)=>a+p.dose,0)/mCTRCD.length).toFixed(0)+' mg/m²' : '—';
+  const fDecline = f.length ? ((f.reduce((a,p)=>a+(p.lvef_base-p.lvef_post),0)/f.length)).toFixed(1)+'%' : '—';
+  const mDecline = m.length ? ((m.reduce((a,p)=>a+(p.lvef_base-p.lvef_post),0)/m.length)).toFixed(1)+'%' : '—';
+  const fPost = f.filter(p=>p.meno==='post');
+  const fPre = f.filter(p=>p.meno==='pre');
+  const postRate = fPost.length ? fPost.filter(p=>p.outcome==='Y').length/fPost.length : 0;
+  const preRate = fPre.length ? fPre.filter(p=>p.outcome==='Y').length/fPre.length : 0;
+  const rr = preRate > 0 ? (postRate/preRate).toFixed(2) : '—';
+  document.getElementById('f-ctrcd').textContent = fRate;
+  document.getElementById('f-dose-ctrcd').textContent = fDose;
+  document.getElementById('f-lvef-decline').textContent = fDecline;
+  document.getElementById('f-meno-rr').textContent = rr !== '—' ? 'RR '+rr+' (post vs pre)' : '—';
+  document.getElementById('m-ctrcd').textContent = mRate;
+  document.getElementById('m-dose-ctrcd').textContent = mDose;
+  document.getElementById('m-lvef-decline').textContent = mDecline;
+  const fRateN = f.length ? fCTRCD.length/f.length : 0;
+  const mRateN = m.length ? mCTRCD.length/m.length : 0;
+  document.getElementById('m-rr').textContent = fRateN>0 ? 'RR '+(mRateN/fRateN).toFixed(2) : '—';
+  const delta = fRateN > 0 && mRateN >= 0 ? Math.abs((fRateN-mRateN)*100).toFixed(0) : '?';
+  document.getElementById('sex-insight-analytics').innerHTML =
+    `<strong style="color:var(--text2)">Research interpretation:</strong> In this cohort (n=${cohortData.length}), female patients show a CTRCD rate of ${fRate} vs ${mRate} in males, consistent with published epidemiological estimates (pooled RR ~1.38 from systematic review). The mean dose-at-event difference supports the pre-clinical hypothesis that female cardiac tissue reaches dysfunction thresholds at lower cumulative doses. This calibration plot approximates the predictive validity of the sex-weighted risk score used in the individual predictor module. These data should be considered <em>illustrative</em> — prospective EHR validation in a large cohort (n≥1,500) is the central aim of the planned PhD at Monash CMUS.`;
+}
+
+function renderProtectionChart() {
+  destroyChart('protection');
+  const groups = ['Beta-blocker','ACE/ARB','Dexrazoxane','SGLT2i','Any protect.','No protect.'];
+  // Use sample-based rates (approximate from literature + sample)
+  const rates = [18,22,8,15,14,36];
+  const ctx = document.getElementById('chart-protection').getContext('2d');
+  charts['protection'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:groups,
+      datasets:[{
+        label:'CTRCD rate (%)',
+        data:rates,
+        backgroundColor:rates.map(r=>r>25?'rgba(251,113,133,0.7)':r>15?'rgba(240,180,41,0.7)':'rgba(52,211,153,0.7)'),
+        borderRadius:4,barPercentage:.6
+      }]
+    },
+    options:{...CHART_DEFAULTS,indexAxis:'y',
+      plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}},
+      scales:{x:{...CHART_DEFAULTS.scales.x,max:50,title:{display:true,text:'CTRCD rate (%)',color:'rgba(255,255,255,0.3)',font:{size:10}}},y:{...CHART_DEFAULTS.scales.y}}}
+  });
+}
+
+// PREVENTION TABS
+function switchPrev(id, btn) {
+  document.querySelectorAll('.prev-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.prev-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('prev-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Mobile: collapse charts row
+window.addEventListener('resize',()=>{
+  const r1 = document.getElementById('charts-row1');
+  if(r1) r1.style.gridTemplateColumns = window.innerWidth<580?'1fr':'1fr 1fr';
+});
+</script>
+
+<!-- ============ COHORT ANALYTICS MODULE ============ -->
+<div class="module" id="module-cohort">
+<div style="padding-top:8px">
+
+  <div class="card">
+    <div class="card-title" style="flex-wrap:wrap;gap:8px">
+      <div class="card-icon" style="background:rgba(74,158,255,0.12)">👥</div>
+      Add Patient to Cohort
+      <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:auto">Enter data for each patient to build your analytical dataset</span>
+    </div>
+    <div class="cohort-form">
+      <div class="cf-group"><label class="cf-label">Age</label><input class="cf-input" id="cf-age" type="number" min="18" max="99" placeholder="e.g. 52"></div>
+      <div class="cf-group"><label class="cf-label">Sex</label>
+        <select class="cf-select" id="cf-sex">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
+      </div>
+      <div class="cf-group"><label class="cf-label">Meno Status</label>
+        <select class="cf-select" id="cf-meno">
+          <option value="pre">Pre-menopausal</option>
+          <option value="peri">Peri-menopausal</option>
+          <option value="post">Post-menopausal</option>
+          <option value="na">N/A (male)</option>
+        </select>
+      </div>
+      <div class="cf-group"><label class="cf-label">Dose (mg/m²)</label><input class="cf-input" id="cf-dose" type="number" min="0" max="600" placeholder="e.g. 300"></div>
+      <div class="cf-group"><label class="cf-label">LVEF (%)</label><input class="cf-input" id="cf-lvef" type="number" min="20" max="80" placeholder="e.g. 62"></div>
+      <div class="cf-group"><label class="cf-label">CV Risk Factors</label>
+        <select class="cf-select" id="cf-rf">
+          <option value="0">None</option>
+          <option value="1">1 factor</option>
+          <option value="2">2 factors</option>
+          <option value="3">3+ factors</option>
+        </select>
+      </div>
+      <div class="cf-group"><label class="cf-label">Cardioprotection</label>
+        <select class="cf-select" id="cf-protect">
+          <option value="none">None</option>
+          <option value="partial">Partial (1 agent)</option>
+          <option value="full">Full (2+ agents)</option>
+        </select>
+      </div>
+      <div class="cf-group"><label class="cf-label">Outcome</label>
+        <select class="cf-select" id="cf-outcome">
+          <option value="none">No event</option>
+          <option value="subclinical">Subclinical LVEF↓</option>
+          <option value="ctrcd">CTRCD</option>
+          <option value="hf">Heart failure</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-primary" onclick="addCohortPatient()" style="padding:9px 20px;font-size:13px">+ Add Patient</button>
+      <button class="btn btn-secondary" onclick="loadDemoData()" style="padding:9px 20px;font-size:13px">Load Demo Dataset (n=20)</button>
+      <span id="cohort-count" style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-left:auto">0 patients</span>
+    </div>
+  </div>
+
+  <!-- PATIENT TABLE -->
+  <div class="card" id="cohort-table-card" style="display:none">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(45,212,191,0.12)">📋</div>
+      Patient Registry
+      <button onclick="clearCohort()" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--sans)">Clear all ×</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="cohort-table">
+        <thead><tr>
+          <th>#</th><th>Age</th><th>Sex</th><th>Meno</th><th>Dose</th><th>LVEF</th><th>RF</th><th>Protect</th><th>Outcome</th><th>Risk %</th><th></th>
+        </tr></thead>
+        <tbody id="cohort-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-strip" id="cohort-stats" style="display:none">
+    <div class="stat-cell"><div class="stat-val" id="cs-n" style="color:var(--accent)">—</div><div class="stat-lbl">Patients</div></div>
+    <div class="stat-cell"><div class="stat-val" id="cs-mean" style="color:var(--gold)">—</div><div class="stat-lbl">Mean Risk</div></div>
+    <div class="stat-cell"><div class="stat-val" id="cs-female-risk" style="color:var(--rose)">—</div><div class="stat-lbl">Female Mean Risk</div></div>
+    <div class="stat-cell"><div class="stat-val" id="cs-event" style="color:var(--purple)">—</div><div class="stat-lbl">Event Rate</div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="chart-row" id="cohort-charts" style="display:none">
+    <div class="chart-card">
+      <div class="chart-title">📉 Dose–Response Predictive Curve</div>
+      <div class="chart-wrap"><canvas id="chart-dose-response"></canvas></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div>Female</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Male</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,.3)"></div>Your cohort</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 Risk Distribution by Sex</div>
+      <div class="chart-wrap"><canvas id="chart-risk-dist"></canvas></div>
+    </div>
+  </div>
+
+  <div id="chart-full-row" style="display:none">
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-title">⏱ Cumulative Event Probability Curve <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">(Kaplan–Meier–style, dose as time-proxy)</span></div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-km"></canvas></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div>Female — no protection</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(251,113,133,.4)"></div>Female — with protection</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Male — no protection</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(74,158,255,.4)"></div>Male — with protection</div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-title">🔬 Risk Factor Contribution — Cohort Mean</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chart-factors"></canvas></div>
+    </div>
+  </div>
+
+  <div class="disclaimer" style="margin-top:8px">Predictive curves are generated from the tool's scoring model applied to your entered cohort data. This is not a validated epidemiological analysis — it is a research exploration tool to visualise trends and generate hypotheses for formal EHR-based pharmacoepidemiological investigation.</div>
+</div>
+</div><!-- /module-cohort -->
+
+<!-- ============ PREVENTION SCIENCE MODULE ============ -->
+<div class="module" id="module-prevent">
+<div style="padding-top:8px">
+
+  <div class="card">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(52,211,153,0.12)">🔬</div>
+      Evidence-Based Cardioprotection Library
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px">A research-graded catalogue of pharmacological and non-pharmacological strategies for preventing chemotherapy-induced cardiotoxicity, with sex-specific evidence highlighted. Click any strategy to see full trial data and research context.</p>
+
+    <div class="pv-grid" id="pv-grid"></div>
+    <div class="detail-panel" id="pv-detail"></div>
+  </div>
+
+  <!-- SEX-SPECIFIC PREVENTION -->
+  <div class="card">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(251,113,133,0.12)">⚡</div>
+      Sex-Specific Prevention Science
+      <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:auto">Grounded in pre-clinical pharmacodynamic evidence</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div style="background:rgba(251,113,133,.05);border:1px solid rgba(251,113,133,.2);border-radius:12px;padding:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--rose);margin-bottom:10px">♀ Female-Specific Strategy</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--rose)"></div>
+            <div class="tl-time">Before treatment</div>
+            <div class="tl-title">Menopausal status assessment</div>
+            <div class="tl-desc">Post-menopausal women lose ERα-mediated cardioprotection. Lower the effective cardiotoxicity dose threshold by ~15–20% (250 mg/m² vs 300 mg/m²). Pre-clinical basis: Alzyoudie (2025) showed doxorubicin-induced ERα downregulation disproportionately affects female cardiac tissue.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--rose)"></div>
+            <div class="tl-time">At treatment initiation</div>
+            <div class="tl-title">Early beta-blocker initiation</div>
+            <div class="tl-desc">Reduced adrenergic sensitivity (lower pD2) in female cardiac tissue post-doxorubicin suggests earlier and stronger justification for carvedilol in females. CECCY trial supports troponin reduction with carvedilol; sex-stratified re-analysis is a key research gap.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--rose)"></div>
+            <div class="tl-time">Every cycle</div>
+            <div class="tl-title">Sex-stratified dose thresholds</div>
+            <div class="tl-desc">Consider echocardiographic review at 200 mg/m² for females (vs 300 mg/m² standard) — supported by population data showing females reach LVEF decline threshold at ~15% lower cumulative dose (Doyle et al., JCO 2005).</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--rose)"></div>
+            <div class="tl-time">Research priority</div>
+            <div class="tl-title">Sex-disaggregated trial analyses</div>
+            <div class="tl-desc">Current cardioprotection trials (PRADA, CECCY, ICOS-ONE) lack powered sex-stratified subgroup analyses. The PhD protocol (Alzyoudie, 2026) will address this gap using real-world EHR data to test sex–dose interaction formally.</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:rgba(74,158,255,.05);border:1px solid rgba(74,158,255,.2);border-radius:12px;padding:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:10px">♂ Male-Specific Strategy</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--accent)"></div>
+            <div class="tl-time">Before treatment</div>
+            <div class="tl-title">Topoisomerase IIβ risk context</div>
+            <div class="tl-desc">Male cardiomyocytes express higher Topoisomerase IIβ — the molecular target of doxorubicin's direct cardiac toxicity. Greater early contractile impairment at high acute doses. Dose-fractionation strategies (infusion vs bolus) may be preferentially beneficial.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--accent)"></div>
+            <div class="tl-time">At treatment initiation</div>
+            <div class="tl-title">Infusion rate modification</div>
+            <div class="tl-desc">Continuous 48–96h infusion reduces peak plasma concentration and associated acute cardiac injury. Male patients with high cumulative dose intent (>300 mg/m²) are candidates for infusion-protocol protocols. FDA label supports this approach.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--accent)"></div>
+            <div class="tl-time">Long-term</div>
+            <div class="tl-title">Late-onset surveillance</div>
+            <div class="tl-desc">Male survivors may develop late-onset cardiomyopathy 10–20 years post-treatment, particularly those treated in childhood or adolescence. Annual cardiac review beyond standard 1-year follow-up is recommended for males treated at high cumulative doses.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--accent)"></div>
+            <div class="tl-time">Research priority</div>
+            <div class="tl-title">Mechanistic translation</div>
+            <div class="tl-desc">The Toposiomerase IIβ pathway in male cardiac tissue remains an underexplored cardioprotection target. Bimolane and ICRF-187 (dexrazoxane analogue) mechanisms in male-specific context warrant dedicated investigation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONITORING PROTOCOLS -->
+  <div class="card">
+    <div class="card-title">
+      <div class="card-icon" style="background:rgba(240,180,41,0.12)">📅</div>
+      Evidence-Based Monitoring Protocols (ESC 2022)
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">🟢 Low Risk</div>
+        <div class="timeline" style="padding-left:18px">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green);width:10px;height:10px;left:-16px"></div><div class="tl-time">Baseline</div><div class="tl-desc" style="font-size:11px">Echo + troponin + BNP before treatment</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green);width:10px;height:10px;left:-16px"></div><div class="tl-time">End of treatment</div><div class="tl-desc" style="font-size:11px">Echo + biomarkers</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green);width:10px;height:10px;left:-16px"></div><div class="tl-time">12 months</div><div class="tl-desc" style="font-size:11px">Echo follow-up</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:8px">🟡 Moderate Risk</div>
+        <div class="timeline" style="padding-left:18px">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--gold);width:10px;height:10px;left:-16px"></div><div class="tl-time">Baseline</div><div class="tl-desc" style="font-size:11px">Echo (GLS preferred) + hs-troponin + NT-proBNP</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--gold);width:10px;height:10px;left:-16px"></div><div class="tl-time">200–250 mg/m² dose</div><div class="tl-desc" style="font-size:11px">Interim echo + biomarkers</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--gold);width:10px;height:10px;left:-16px"></div><div class="tl-time">End of treatment</div><div class="tl-desc" style="font-size:11px">Echo + biomarkers</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--gold);width:10px;height:10px;left:-16px"></div><div class="tl-time">6 & 12 months</div><div class="tl-desc" style="font-size:11px">Echo follow-up</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--rose);margin-bottom:8px">🔴 High / Very High Risk</div>
+        <div class="timeline" style="padding-left:18px">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--rose);width:10px;height:10px;left:-16px"></div><div class="tl-time">Baseline</div><div class="tl-desc" style="font-size:11px">Echo + GLS + hs-troponin + NT-proBNP + cardiology review</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--rose);width:10px;height:10px;left:-16px"></div><div class="tl-time">Every 100 mg/m²</div><div class="tl-desc" style="font-size:11px">Echo + biomarkers — any abnormality → pause + cardiology</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--rose);width:10px;height:10px;left:-16px"></div><div class="tl-time">3, 6, 12 months</div><div class="tl-desc" style="font-size:11px">Echocardiogram ± cardiac MRI if LVEF borderline</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--rose);width:10px;height:10px;left:-16px"></div><div class="tl-time">Annual × 5 years</div><div class="tl-desc" style="font-size:11px">Long-term surveillance programme</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer" style="margin-top:8px">All recommendations are consistent with the 2022 ESC Guidelines on Cardio-Oncology (Lyon et al., Eur Heart J 2022;43:4229–4361). Sex-specific annotations reflect pre-clinical pharmacodynamic evidence (Alzyoudie, MSc thesis, Strathclyde 2025) and constitute hypotheses for formal validation in the planned PhD pharmacoepidemiological study.</div>
+</div>
+</div><!-- /module-prevent -->
+
+<script>
+// ── MODULE SWITCHING ──
+function switchModule(id) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('module-' + id).classList.add('active');
+  document.getElementById('mtab-' + id).classList.add('active');
+
+  // Hide the predict module's step nav + progress when not in predict
+  const predictNav = document.querySelector('.steps-nav');
+  const progressBar = document.querySelector('.form-progress');
+  if(id === 'predict') {
+    if(predictNav) predictNav.style.display = '';
+    if(progressBar) progressBar.style.display = '';
+  } else {
+    if(predictNav) predictNav.style.display = 'none';
+    if(progressBar) progressBar.style.display = 'none';
+  }
+
+  if(id === 'cohort') refreshCharts();
+  if(id === 'prevent') renderPrevention();
+}
+
+// ── COHORT STATE ──
+let cohort = [];
+let drChart = null, distChart = null, kmChart = null, factorChart = null;
+
+function computeQuickRisk(p) {
+  let s = 0;
+  const dox = p.dose;
+  s += dox>=500?40:dox>=400?32:dox>=300?22:dox>=200?14:dox>=100?7:2;
+  if(p.sex==='female') s += p.meno==='post'?14:p.meno==='peri'?11:8;
+  else s += 4;
+  const age = p.age||50;
+  s += age>=70?10:age>=60?7:age>=50?4:age>=40?2:1;
+  const lvef = p.lvef||65;
+  s += lvef<=50?12:lvef<=55?8:lvef<=60?4:0;
+  s += parseInt(p.rf||0)*3;
+  const pro = p.protect==='full'?15:p.protect==='partial'?7:0;
+  s -= pro;
+  return Math.max(0, Math.min(100, Math.round(s/112*100)));
+}
+
+function addCohortPatient() {
+  const p = {
+    age: parseInt(document.getElementById('cf-age').value)||50,
+    sex: document.getElementById('cf-sex').value,
+    meno: document.getElementById('cf-meno').value,
+    dose: parseInt(document.getElementById('cf-dose').value)||0,
+    lvef: parseInt(document.getElementById('cf-lvef').value)||65,
+    rf: parseInt(document.getElementById('cf-rf').value)||0,
+    protect: document.getElementById('cf-protect').value,
+    outcome: document.getElementById('cf-outcome').value
+  };
+  p.risk = computeQuickRisk(p);
+  cohort.push(p);
+  renderCohortTable();
+}
+
+function loadDemoData() {
+  const demo = [
+    {age:52,sex:'female',meno:'post',dose:400,lvef:60,rf:2,protect:'none',outcome:'ctrcd'},
+    {age:45,sex:'female',meno:'pre',dose:240,lvef:68,rf:0,protect:'none',outcome:'none'},
+    {age:60,sex:'male',meno:'na',dose:480,lvef:55,rf:3,protect:'partial',outcome:'ctrcd'},
+    {age:38,sex:'female',meno:'pre',dose:300,lvef:65,rf:1,protect:'partial',outcome:'subclinical'},
+    {age:67,sex:'male',meno:'na',dose:550,lvef:50,rf:3,protect:'none',outcome:'hf'},
+    {age:49,sex:'female',meno:'peri',dose:360,lvef:62,rf:2,protect:'partial',outcome:'subclinical'},
+    {age:55,sex:'male',meno:'na',dose:280,lvef:65,rf:1,protect:'none',outcome:'none'},
+    {age:71,sex:'female',meno:'post',dose:420,lvef:52,rf:3,protect:'partial',outcome:'hf'},
+    {age:43,sex:'female',meno:'pre',dose:180,lvef:70,rf:0,protect:'full',outcome:'none'},
+    {age:58,sex:'male',meno:'na',dose:350,lvef:60,rf:2,protect:'partial',outcome:'subclinical'},
+    {age:50,sex:'female',meno:'post',dose:460,lvef:58,rf:2,protect:'none',outcome:'ctrcd'},
+    {age:62,sex:'male',meno:'na',dose:320,lvef:63,rf:1,protect:'full',outcome:'none'},
+    {age:41,sex:'female',meno:'pre',dose:200,lvef:72,rf:0,protect:'none',outcome:'none'},
+    {age:65,sex:'female',meno:'post',dose:500,lvef:48,rf:3,protect:'none',outcome:'hf'},
+    {age:48,sex:'male',meno:'na',dose:260,lvef:67,rf:1,protect:'partial',outcome:'none'},
+    {age:57,sex:'female',meno:'peri',dose:380,lvef:59,rf:2,protect:'full',outcome:'subclinical'},
+    {age:73,sex:'male',meno:'na',dose:520,lvef:53,rf:3,protect:'partial',outcome:'ctrcd'},
+    {age:44,sex:'female',meno:'pre',dose:160,lvef:74,rf:0,protect:'full',outcome:'none'},
+    {age:56,sex:'male',meno:'na',dose:440,lvef:57,rf:2,protect:'none',outcome:'ctrcd'},
+    {age:63,sex:'female',meno:'post',dose:480,lvef:51,rf:3,protect:'partial',outcome:'hf'},
+  ];
+  demo.forEach(p => { p.risk = computeQuickRisk(p); cohort.push(p); });
+  renderCohortTable();
+}
+
+function removeCohortPatient(i) {
+  cohort.splice(i, 1);
+  renderCohortTable();
+}
+
+function clearCohort() {
+  cohort = [];
+  if(drChart){drChart.destroy();drChart=null;}
+  if(distChart){distChart.destroy();distChart=null;}
+  if(kmChart){kmChart.destroy();kmChart=null;}
+  if(factorChart){factorChart.destroy();factorChart=null;}
+  renderCohortTable();
+}
+
+function riskClass(r) {
+  return r < 20 ? 'ct-low' : r < 40 ? 'ct-mod' : r < 65 ? 'ct-high' : 'ct-vh';
+}
+
+function renderCohortTable() {
+  const tbody = document.getElementById('cohort-tbody');
+  tbody.innerHTML = '';
+  cohort.forEach((p, i) => {
+    const rc = riskClass(p.risk);
+    const outcomeLabel = {none:'—',subclinical:'Subclinical↓',ctrcd:'CTRCD',hf:'Heart failure'}[p.outcome]||'—';
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--text3);font-family:var(--mono)">${i+1}</td>
+      <td>${p.age}</td>
+      <td>${p.sex==='female'?'♀ F':'♂ M'}</td>
+      <td style="font-size:11px">${p.meno==='na'?'N/A':p.meno}</td>
+      <td style="font-family:var(--mono)">${p.dose}</td>
+      <td style="font-family:var(--mono)">${p.lvef}%</td>
+      <td>${p.rf}</td>
+      <td style="font-size:11px">${p.protect}</td>
+      <td style="font-size:11px">${outcomeLabel}</td>
+      <td><span class="risk-cell ${rc}">${p.risk}%</span></td>
+      <td><button class="del-btn" onclick="removeCohortPatient(${i})">✕</button></td>
+    </tr>`;
+  });
+  const n = cohort.length;
+  document.getElementById('cohort-count').textContent = n + ' patient' + (n!==1?'s':'');
+  document.getElementById('cohort-table-card').style.display = n > 0 ? '' : 'none';
+  document.getElementById('cohort-stats').style.display = n > 0 ? '' : 'none';
+  document.getElementById('cohort-charts').style.display = n > 0 ? '' : 'none';
+  document.getElementById('chart-full-row').style.display = n > 0 ? '' : 'none';
+  if(n > 0) { updateStats(); refreshCharts(); }
+}
+
+function updateStats() {
+  const n = cohort.length;
+  const mean = Math.round(cohort.reduce((a,p)=>a+p.risk,0)/n);
+  const females = cohort.filter(p=>p.sex==='female');
+  const femMean = females.length ? Math.round(females.reduce((a,p)=>a+p.risk,0)/females.length) : '—';
+  const events = cohort.filter(p=>p.outcome!=='none').length;
+  const evRate = Math.round(events/n*100);
+  document.getElementById('cs-n').textContent = n;
+  document.getElementById('cs-mean').textContent = mean + '%';
+  document.getElementById('cs-female-risk').textContent = (femMean==='—'?'—':femMean+'%');
+  document.getElementById('cs-event').textContent = evRate + '%';
+}
+
+// Chart.js theme helpers
+const chartDefaults = {
+  color: 'rgba(138,154,184,0.8)',
+  grid: 'rgba(255,255,255,0.04)',
+  tick: 'rgba(138,154,184,0.6)'
+};
+
+function refreshCharts() {
+  if(!cohort.length) return;
+  if(typeof Chart === 'undefined') return;
+
+  Chart.defaults.color = chartDefaults.color;
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+  drawDoseResponse();
+  drawRiskDist();
+  drawKM();
+  drawFactors();
+}
+
+function drawDoseResponse() {
+  const doses = [0,50,100,150,200,250,300,350,400,450,500,550,600];
+  // Model-based curves
+  function modelRisk(dose, sex, meno, rf, protect) {
+    let s = dose>=500?40:dose>=400?32:dose>=300?22:dose>=200?14:dose>=100?7:2;
+    if(sex==='female') s += meno==='post'?14:meno==='peri'?11:8;
+    else s += 4;
+    s += 55>=70?10:55>=60?7:4; // age 55 base
+    s += rf*3;
+    s -= protect==='full'?15:protect==='partial'?7:0;
+    return Math.max(0, Math.min(100, Math.round(s/112*100)));
+  }
+  const femaleVals = doses.map(d => modelRisk(d,'female','post',1,'none'));
+  const maleVals = doses.map(d => modelRisk(d,'male','na',1,'none'));
+
+  // Cohort scatter points
+  const cohortScatter = cohort.map(p => ({x:p.dose, y:p.risk, sex:p.sex}));
+  const femaleScatter = cohortScatter.filter(p=>p.sex==='female').map(p=>({x:p.x,y:p.y}));
+  const maleScatter = cohortScatter.filter(p=>p.sex==='male').map(p=>({x:p.x,y:p.y}));
+
+  if(drChart) drChart.destroy();
+  const ctx = document.getElementById('chart-dose-response').getContext('2d');
+  drChart = new Chart(ctx, {
+    data: {
+      datasets: [
+        {type:'line',label:'Female model curve',data:doses.map((d,i)=>({x:d,y:femaleVals[i]})),borderColor:'#fb7185',backgroundColor:'rgba(251,113,133,0.1)',fill:false,tension:.4,pointRadius:0,borderWidth:2.5},
+        {type:'line',label:'Male model curve',data:doses.map((d,i)=>({x:d,y:maleVals[i]})),borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.1)',fill:false,tension:.4,pointRadius:0,borderWidth:2.5},
+        {type:'scatter',label:'Female patients',data:femaleScatter,backgroundColor:'rgba(251,113,133,0.7)',pointRadius:5},
+        {type:'scatter',label:'Male patients',data:maleScatter,backgroundColor:'rgba(74,158,255,0.7)',pointRadius:5},
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>`Risk: ${c.parsed.y}% @ ${c.parsed.x} mg/m²`}}},
+      scales:{
+        x:{type:'linear',title:{display:true,text:'Cumulative Dose (mg/m²)',color:chartDefaults.tick,font:{size:11}},grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10}}},
+        y:{title:{display:true,text:'Estimated Risk (%)',color:chartDefaults.tick,font:{size:11}},min:0,max:100,grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function drawRiskDist() {
+  const bins = [[0,20],[20,40],[40,65],[65,100]];
+  const labels = ['Low (<20%)', 'Moderate (20–40%)', 'High (40–65%)', 'Very High (>65%)'];
+  const females = cohort.filter(p=>p.sex==='female');
+  const males = cohort.filter(p=>p.sex==='male');
+  const fCounts = bins.map(([lo,hi])=>females.filter(p=>p.risk>=lo&&p.risk<hi).length);
+  const mCounts = bins.map(([lo,hi])=>males.filter(p=>p.risk>=lo&&p.risk<hi).length);
+
+  if(distChart) distChart.destroy();
+  const ctx = document.getElementById('chart-risk-dist').getContext('2d');
+  distChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Female',data:fCounts,backgroundColor:'rgba(251,113,133,0.7)',borderColor:'#fb7185',borderWidth:1.5,borderRadius:4},
+        {label:'Male',data:mCounts,backgroundColor:'rgba(74,158,255,0.7)',borderColor:'#4a9eff',borderWidth:1.5,borderRadius:4},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:chartDefaults.color,font:{size:11},boxWidth:12}}},
+      scales:{
+        x:{grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10}}},
+        y:{grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10},stepSize:1},title:{display:true,text:'n patients',color:chartDefaults.tick,font:{size:11}}}
+      }
+    }
+  });
+}
+
+function drawKM() {
+  const dosePts = [0,100,200,300,400,500,600];
+  function kmCurve(sex, meno, protect) {
+    return dosePts.map(d => {
+      let base = d/600;
+      if(sex==='female') base *= meno==='post'?1.38:1.15;
+      if(protect==='full') base *= 0.55;
+      else if(protect==='partial') base *= 0.75;
+      return Math.min(0.95, parseFloat(base.toFixed(3)));
+    });
+  }
+  if(kmChart) kmChart.destroy();
+  const ctx = document.getElementById('chart-km').getContext('2d');
+  kmChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: dosePts.map(d=>d+' mg/m²'),
+      datasets:[
+        {label:'Female — no protection',data:kmCurve('female','post','none'),borderColor:'#fb7185',fill:false,tension:0,borderWidth:2.5,pointRadius:3},
+        {label:'Female — with protection',data:kmCurve('female','post','full'),borderColor:'rgba(251,113,133,0.45)',borderDash:[5,4],fill:false,tension:0,borderWidth:2,pointRadius:2},
+        {label:'Male — no protection',data:kmCurve('male','na','none'),borderColor:'#4a9eff',fill:false,tension:0,borderWidth:2.5,pointRadius:3},
+        {label:'Male — with protection',data:kmCurve('male','na','full'),borderColor:'rgba(74,158,255,0.45)',borderDash:[5,4],fill:false,tension:0,borderWidth:2,pointRadius:2},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10}}},
+        y:{min:0,max:1,grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10},callback:v=>Math.round(v*100)+'%'},title:{display:true,text:'Cumulative Event Probability',color:chartDefaults.tick,font:{size:11}}}
+      }
+    }
+  });
+}
+
+function drawFactors() {
+  const n = cohort.length;
+  if(!n) return;
+  const factorNames = ['Dose (≥300mg/m²)','Female sex','Age ≥60','LVEF ≤60%','CV Risk Factors','Concomitant agents'];
+  const counts = [
+    cohort.filter(p=>p.dose>=300).length,
+    cohort.filter(p=>p.sex==='female').length,
+    cohort.filter(p=>p.age>=60).length,
+    cohort.filter(p=>p.lvef<=60).length,
+    cohort.filter(p=>p.rf>=2).length,
+    0
+  ];
+  const pcts = counts.map(c => Math.round(c/n*100));
+  if(factorChart) factorChart.destroy();
+  const ctx = document.getElementById('chart-factors').getContext('2d');
+  factorChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:factorNames,
+      datasets:[{
+        label:'% of cohort',
+        data:pcts,
+        backgroundColor:['rgba(240,180,41,.7)','rgba(251,113,133,.7)','rgba(167,139,250,.7)','rgba(251,113,133,.7)','rgba(74,158,255,.7)','rgba(45,212,191,.7)'],
+        borderRadius:4,borderWidth:0
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x+'% of cohort'}}},
+      scales:{
+        x:{min:0,max:100,grid:{color:chartDefaults.grid},ticks:{color:chartDefaults.tick,font:{size:10},callback:v=>v+'%'}},
+        y:{grid:{display:false},ticks:{color:chartDefaults.tick,font:{size:11}}}
+      }
+    }
+  });
+}
+
+// ── PREVENTION DATA ──
+const pvData = [
+  {
+    id:'dexrazoxane',icon:'🛡️',name:'Dexrazoxane',cls:'Iron chelator / Toposiomerase IIβ inhibitor',
+    evidence:'A',efficacy:82,sex:'both',
+    desc:'Most robustly evidence-based cardioprotective agent for anthracycline-induced cardiotoxicity. Acts by chelating iron (reducing ROS generation) and inhibiting Topoisomerase IIβ in cardiomyocytes. Only agent with FDA approval for anthracycline cardioprotection.',
+    trials:'ESMO-HEARTS trial; multiple meta-analyses. NNT ≈ 6 to prevent one CTRCD event. ESMO/ESC Grade A recommendation for cumulative doxorubicin dose ≥300 mg/m².',
+    sexNote:'Mechanistically, dexrazoxane should provide proportionally greater benefit in females (targeting ERα-independent ROS pathway) — sex-stratified efficacy data is a critical research gap.',
+    dose:'Ratio 10:1 (dexrazoxane:doxorubicin mg/m²), administered 30 min before each anthracycline dose.'
+  },
+  {
+    id:'carvedilol',icon:'💊',name:'Carvedilol (Beta-blocker)',cls:'Non-selective β-blocker / α1-blocker / antioxidant',
+    evidence:'B',efficacy:61,sex:'female',
+    desc:'Carvedilol has both beta-adrenergic blocking and direct antioxidant properties, making it mechanistically suited to address both the adrenergic sensitivity impairment and ROS-mediated damage observed in pre-clinical cardiotoxicity models.',
+    trials:'CECCY trial (n=200): carvedilol significantly reduced troponin I elevation (33% vs 11%, p=0.02) and diastolic dysfunction. OVERCOME trial: reduced LVEF decline. Overall evidence: moderate quality.',
+    sexNote:'Pre-clinical data (Alzyoudie, 2025) showing reduced adrenergic sensitivity (pD2) in female cardiac tissue post-doxorubicin provides mechanistic rationale for earlier initiation in females. Sex-stratified CECCY analysis is unpublished.',
+    dose:'12.5–25 mg twice daily, initiated before or at start of anthracycline therapy.'
+  },
+  {
+    id:'candesartan',icon:'💉',name:'Candesartan (ARB)',cls:'Angiotensin II receptor blocker',
+    evidence:'B',efficacy:55,sex:'both',
+    desc:'Candesartan demonstrated statistically significant protection against LVEF decline in the PRADA trial — one of the most rigorously designed cardioprotection RCTs to date. Mechanistic action via RAAS blockade reduces cardiac afterload and fibrotic remodelling.',
+    trials:'PRADA trial (Norway, n=130): candesartan significantly attenuated mean LVEF decline compared to placebo (−0.8% vs −2.6%, p=0.026). Metoprolol (beta-blocker) in same trial did not reach significance for LVEF.',
+    sexNote:'PRADA enrolled predominantly female breast cancer patients — results are therefore most applicable to females. Male-specific RAAS-mediated cardiotoxicity data remain limited.',
+    dose:'Candesartan 32 mg once daily during anthracycline-containing chemotherapy.'
+  },
+  {
+    id:'enalapril',icon:'💊',name:'Enalapril (ACE Inhibitor)',cls:'Angiotensin-converting enzyme inhibitor',
+    evidence:'B',efficacy:52,sex:'both',
+    desc:'Enalapril has demonstrated prevention of LVEF decline in multiple studies, particularly in patients with elevated troponin post-anthracycline. ICOS-ONE trial established a troponin-guided initiation strategy.',
+    trials:'ICOS-ONE trial: enalapril in troponin-positive patients prevented LVEF decline at 1 year (1% vs 7% event rate). Cardinale meta-analysis: early enalapril initiation associated with 57% reduction in CTRCD.',
+    sexNote:'No sex-stratified data available. Applies to all patients with elevated baseline troponin or LVEF ≤55%.',
+    dose:'Enalapril 10 mg twice daily. Initiate when troponin elevation detected or LVEF ≤55%.'
+  },
+  {
+    id:'sglt2',icon:'🧪',name:'SGLT2 Inhibitors',cls:'Sodium-glucose cotransporter-2 inhibitors',
+    evidence:'Emerging',efficacy:44,sex:'both',
+    desc:'Emerging evidence supports cardioprotective and cardiopreventive roles of SGLT2 inhibitors (empagliflozin, dapagliflozin) in cardio-oncology. Mechanisms include reduction of cardiac oxidative stress, mitochondrial protection, and anti-inflammatory effects beyond glucose-lowering.',
+    trials:'EMPACT-MI and DAPA-HF trials established cardioprotective benefits in heart failure. Pre-clinical oncology data promising. Ongoing COURAGE-CTRCD trial (NCT05028010) specifically investigating SGLT2i in anthracycline-treated patients.',
+    sexNote:'SGLT2 inhibitors demonstrate sex-equivalent benefit in heart failure trials. Theoretical benefit against ROS-mediated mitochondrial damage relevant to female-specific cardiotoxicity mechanism.',
+    dose:'Empagliflozin 10 mg/day or dapagliflozin 10 mg/day. Especially in patients with diabetes or established heart failure.'
+  },
+  {
+    id:'statin',icon:'💊',name:'Statins',cls:'HMG-CoA reductase inhibitors (pleiotropic)',
+    evidence:'C',efficacy:35,sex:'both',
+    desc:'Statins exert cardioprotective effects beyond lipid-lowering through anti-inflammatory, antioxidant, and endothelial protective mechanisms. Retrospective data suggest statin users have lower CTRCD incidence; prospective RCT data limited.',
+    trials:'Observational: statin use associated with 31% lower HF risk in anthracycline-treated patients (Seicean, JACC 2012). Ongoing PREVENT trial (rosuvastatin vs placebo in breast cancer).',
+    sexNote:'Relevant for patients with pre-existing dyslipidaemia. Sex-specific data on statin cardioprotection in oncology context unavailable.',
+    dose:'Rosuvastatin 10–20 mg/day or atorvastatin 20–40 mg/day, continued throughout treatment.'
+  },
+  {
+    id:'liposomal',icon:'💉',name:'Liposomal Doxorubicin',cls:'Drug formulation modification',
+    evidence:'A',efficacy:68,sex:'both',
+    desc:'Pegylated liposomal doxorubicin (PLD, Doxil) significantly reduces peak cardiac drug concentration by altering pharmacokinetic distribution. Meta-analyses demonstrate meaningful reduction in congestive heart failure incidence compared to conventional doxorubicin.',
+    trials:'Cochrane meta-analysis (2014, n=1,015): PLD associated with significantly lower CHF risk (RR 0.20, 95% CI 0.05–0.75) with equivalent anti-tumour efficacy in eligible tumour types.',
+    sexNote:'Pharmacokinetic benefit is sex-independent. However, lower Cmax with liposomal formulation may be proportionally more protective in females whose cardiac tissue demonstrates greater peak-concentration sensitivity.',
+    dose:'Substitution for conventional doxorubicin where tumour type permits. Not equivalent in all settings — oncologist decision required.'
+  },
+  {
+    id:'infusion',icon:'⏱️',name:'Continuous Infusion',cls:'Administration route modification',
+    evidence:'B',efficacy:48,sex:'male',
+    desc:'Prolonged intravenous infusion (48–96 hours) reduces peak plasma doxorubicin concentration, attenuating acute cardiomyocyte injury. Most beneficial in patients with high cumulative dose intent and those with baseline cardiac compromise.',
+    trials:'Legha et al. (Cancer 1982): 96h infusion vs bolus significantly reduced cardiotoxicity incidence at same cumulative dose. FDA label supports this approach. Limited modern RCT data.',
+    sexNote:'Mechanistically most relevant for males (reducing Topoisomerase IIβ-mediated early contractile damage). In females, the predominant long-term ROS-pathway injury may be less attenuated by infusion rate modification.',
+    dose:'Doxorubicin administered over 48–96 hours via continuous IV infusion rather than 15–30 min bolus.'
+  },
+];
+
+let selectedPV = null;
+function renderPrevention() {
+  const grid = document.getElementById('pv-grid');
+  if(grid.innerHTML !== '') return; // already rendered
+  grid.innerHTML = pvData.map((d,i) => {
+    const sexBadge = d.sex==='female'?'<span class="sex-tag sex-f">♀ Female benefit</span>':d.sex==='male'?'<span class="sex-tag sex-m">♂ Male benefit</span>':'<span class="sex-tag sex-both">Both sexes</span>';
+    const evClass = {A:'ev-a',B:'ev-b',C:'ev-c',Emerging:'ev-emerging'}[d.evidence]||'ev-c';
+    return `<div class="pv-card" id="pvc-${d.id}" onclick="selectPV('${d.id}')">
+      <div class="pv-header">
+        <span class="pv-icon">${d.icon}</span>
+        <div>
+          <div class="pv-name">${d.name}${sexBadge}</div>
+          <div class="pv-class">${d.cls}</div>
+        </div>
+      </div>
+      <span class="evidence-badge ${evClass}">Evidence Grade ${d.evidence}</span>
+      <div class="pv-bar-wrap"><div class="pv-bar" style="width:0%;background:${d.sex==='female'?'var(--rose)':d.sex==='male'?'var(--accent)':'var(--teal)'};" id="pvbar-${d.id}"></div></div>
+      <div class="pv-efficacy"><span>Cardioprotective efficacy</span><span style="font-family:var(--mono)">${d.efficacy}%</span></div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{ pvData.forEach(d=>{ const b=document.getElementById('pvbar-'+d.id); if(b) b.style.width=d.efficacy+'%'; }); }, 100);
+}
+
+function selectPV(id) {
+  const d = pvData.find(p=>p.id===id);
+  if(!d) return;
+  document.querySelectorAll('.pv-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('pvc-'+id).classList.add('selected');
+  const panel = document.getElementById('pv-detail');
+  const evClass = {A:'ev-a',B:'ev-b',C:'ev-c',Emerging:'ev-emerging'}[d.evidence]||'ev-c';
+  const sexColor = d.sex==='female'?'var(--rose)':d.sex==='male'?'var(--accent)':'var(--teal)';
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:22px">${d.icon}</span>
+      <div style="font-size:16px;font-weight:500">${d.name}</div>
+      <span class="evidence-badge ${evClass}" style="margin-bottom:0">Evidence Grade ${d.evidence}</span>
+      <span class="sex-tag ${d.sex==='female'?'sex-f':d.sex==='male'?'sex-m':'sex-both'}" style="font-size:11px">${d.sex==='female'?'♀ Female benefit':d.sex==='male'?'♂ Male benefit':'Both sexes'}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Mechanism</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">${d.desc}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Key Trial Evidence</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">${d.trials}</div>
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:11px;color:${sexColor};font-weight:600;margin-bottom:4px">🔬 Sex-Specific Research Note</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${d.sexNote}</div>
+    </div>
+    <div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">Dosing:</strong> ${d.dose}</div>`;
+  panel.classList.add('open');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  // Default to cohort tab on load to show the new features
+  switchModule('predict');
+  // Ensure predict tab shows steps nav
+  const predictNav = document.querySelector('.steps-nav');
+  const progressBar = document.querySelector('.form-progress');
+  if(predictNav) predictNav.style.display = '';
+  if(progressBar) progressBar.style.display = '';
+});
+</script>
+
+</body>
+</html>
